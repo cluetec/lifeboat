@@ -24,6 +24,9 @@
 # Go workspace file
 go.work
 
+# Build files
+/out
+
 ### Helm ###
 # Chart dependencies
 **/charts/*.tgz
