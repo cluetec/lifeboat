@@ -1,0 +1,40 @@
+name: scan:codeql
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**/*.md'
+  schedule:
+    - cron: "0 0 * * 0"
+
+permissions:
+  actions: read  # for github/codeql-action/init to get workflow details
+  contents: read  # for actions/checkout to fetch code
+  security-events: write  # for github/codeql-action/analyze to upload SARIF results
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # 2.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            *.github.com:443
+            proxy.golang.org:443
+            storage.googleapis.com:443
+            sum.golang.org:443
+            objects.githubusercontent.com:443
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go
+          queries: security-and-quality
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2

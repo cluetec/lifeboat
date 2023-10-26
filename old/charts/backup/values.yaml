@@ -1,0 +1,114 @@
+# Default values for backup.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Specifies how to treat concurrent executions of a Job. Valid values are: - "Allow": allows CronJobs to run concurrently; - "Forbid": forbids concurrent runs, skipping next run if previous run hasn't finished yet; - "Replace": cancels currently running job and replaces it with a new one
+concurrencyPolicy: Forbid
+
+# -- The number of failed finished jobs to retain. Value must be non-negative integer.
+failedJobsHistoryLimit: 1
+
+# -- The schedule in Cron format, see <https://en.wikipedia.org/wiki/Cron>. Default is everyday at 3am
+schedule: 0 3 * * *
+
+# -- Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones.
+startingDeadlineSeconds:
+
+# -- The number of successful finished jobs to retain. Value must be non-negative integer.
+successfulJobsHistoryLimit: 3
+
+# -- This flag tells the controller to suspend subsequent executions, it does not apply to already started executions.
+suspend: false
+
+# -- The time zone name for the given schedule, see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>. If not specified, this will default to the time zone of the kube-controller-manager process. The set of valid time zone names and the time zone offset is loaded from the system-wide time zone database by the API server during CronJob validation and the controller manager during execution. If no system-wide time zone database can be found a bundled version of the database is used instead. If the time zone name becomes invalid during the lifetime of a CronJob or due to a change in host configuration, the controller will stop creating new new Jobs and will create a system event with the reason UnknownTimeZone. More information can be found in <https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#time-zones>
+timeZone:
+
+image:
+  # -- The repository path of the container image.
+  repository: zfdos.azurecr.io/zf-metamodel
+  # -- The pull policy for the container image.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  # tag: "latest"
+
+# -- Container registry secret names as an array
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Extra environment variables that will be pass onto deployment pods.
+env: {}
+#  ENV_NAME: value
+
+# -- ["valueFrom" environment variable references](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/) that will be added to deployment pods. Name is templated.
+envValueFrom: {}
+#  ENV_NAME:
+#    configMapKeyRef:
+#      name: configmap-name
+#      key: value_key
+#    secretKeyRef:
+#      name: secret-name
+#      key: value_key
+
+# -- [Kubernetes Secret Resource](https://kubernetes.io/docs/concepts/configuration/secret/) names to load environment variables from.
+envSecretNames: []
+#  - first-secret
+#  - second-secret
+
+# -- [Kubernetes ConfigMap Resource](https://kubernetes.io/docs/concepts/configuration/configmap/) names to load environment variables from.
+envConfigMapNames: []
+#  - first-config-map
+#  - second-config-map
+
+# -- [Additional pod annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+podAnnotations: {}
+
+# -- [Pod security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod)
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- [Container security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container)
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # limits:
+    # -- Maximum CPU limit
+    # cpu: 500m
+    # -- Maximum memory limit
+    # memory: 512Mi
+  # requests:
+    # -- Initial CPU request
+    # cpu: 100m
+    # -- Initial memory request
+    # memory: 256Mi
+
+# -- [Kubernetes node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/) allows to select specific Kubernetes nodes (nodes) on which the pod should be scheduled.
+nodeSelector: {}
+
+# -- [Kubernetes tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) allow the scheduler to schedule pods with matching taints (constraints).
+tolerations: []
+
+# -- [Kubernetes affinity and anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) allows defining rules that determine on which nodes the pod should be run preferentially.
+affinity: {}
+
+# -- Additional volumeMounts to the backend container
+volumeMounts: []
+
+# -- Additional volumes to the backend pod
+volumes: []
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  name: ""
+  # -- List of image pull secret names which should be used by the service account
+  imagePullSecrets: []
