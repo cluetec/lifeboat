@@ -1,0 +1,32 @@
+name: Labeler
+
+on:
+  - pull_request_target
+  - workflow_dispatch
+
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  label:
+    permissions:
+      contents: read  # for actions/labeler to determine modified files
+      pull-requests: write  # for actions/labeler to add labels to PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423 # v2.6.0
+        with:
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+          disable-sudo: true
+          disable-telemetry: true
+          egress-policy: block
+      - name: Checkout repository
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594 # v4.3.0
+        with:
+          dot: true
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"

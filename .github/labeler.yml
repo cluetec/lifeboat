@@ -1,0 +1,7 @@
+# Documentation: https://github.com/actions/labeler
+
+ci:
+  - .github/**
+
+documentation:
+  - "**/*.md"

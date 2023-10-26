@@ -1,0 +1,10 @@
+# Documentation: https://github.com/DavidAnson/markdownlint-cli2#configuration
+
+# Setting the special default rule to true or false includes/excludes all rules by default.
+"default": true
+
+# Do not restrict line length: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#MD013
+"MD013": false
+
+# Do not restrict inline HTML: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#MD033
+"MD033": false
