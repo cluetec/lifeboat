@@ -1,0 +1,7 @@
+apiVersion: edcaas.dos.zf.com/v1alpha1
+kind: VaultConfig
+metadata:
+  name: {{ include "backup.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backup.labels" $ | nindent 4 }}
