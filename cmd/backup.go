@@ -13,10 +13,25 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-package main
+package cmd
 
-import "github.com/cluetec/lifeboat/cmd"
+import (
+	"fmt"
 
-func main() {
-	cmd.Execute()
+	"github.com/spf13/cobra"
+)
+
+// backupCmd represents the backup command
+var backupCmd = &cobra.Command{
+	Use:   "backup",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("backup called")
+	},
 }
