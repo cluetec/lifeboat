@@ -25,7 +25,7 @@ import (
 var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Execute the backup.",
-	Long:  `Execute the backup. Used config can be overridden by providing arguments.`,
+	Long:  "Execute the backup. Used config can be overridden by providing arguments.",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("backup called")
 	},

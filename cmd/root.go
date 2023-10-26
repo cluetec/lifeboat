@@ -25,7 +25,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "lb",
 	Short: "Perform backups from any source to any destination.",
-	Long:  `Lifeboat is a general purpose backup tool which supports backups for arbitrary sources and destinations.`,
+	Long:  "Lifeboat is a general purpose backup tool which supports backups for arbitrary sources and destinations.",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
