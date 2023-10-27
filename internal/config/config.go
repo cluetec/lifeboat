@@ -13,25 +13,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package config
 
 import (
+	"github.com/spf13/viper"
 	"log/slog"
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
-func InitViper() error {
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AddConfigPath(".")
-	viper.SetConfigFile("./config.yaml")
+type CustomConfigs map[string]interface{}
 
-	if err := viper.ReadInConfig(); err != nil {
-		slog.Error("error while reading in the configs: %w", err)
-		return err
+//type SourceConfig struct {
+//	CustomConfigs
+//	Type string
+//}
+//
+//type DestinationConfig struct {
+//	CustomConfigs
+//	Type string
+//}
+
+type Config struct {
+	Source      CustomConfigs
+	Destination CustomConfigs
+	LogLevel    string
+}
+
+func (c *Config) GetLogLevel() slog.Level {
+	var level slog.Level
+
+	switch strings.ToLower(c.LogLevel) {
+	case "debug":
+		level = slog.LevelDebug
+	case "info":
+		level = slog.LevelInfo
+	case "warn":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
 	}
 
-	return nil
+	return level
+}
+
+func (c *Config) DebugEnabled() bool {
+	return strings.ToLower(c.LogLevel) == "debug"
+}
+
+func New() (*Config, error) {
+	var c Config
+
+	err := viper.Unmarshal(&c)
+	if err != nil {
+		slog.Error("unable to decode into struct, %w", err)
+		return nil, err
+	}
+
+	return &c, nil
 }

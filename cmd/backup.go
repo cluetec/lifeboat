@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cmd
 
 import (
-	"fmt"
+	"github.com/cluetec/lifeboat/internal/config"
+	"github.com/cluetec/lifeboat/internal/destination"
+	"github.com/cluetec/lifeboat/internal/logging"
+	"github.com/cluetec/lifeboat/internal/source"
+	"log/slog"
+	"os"
 
 	"github.com/spf13/cobra"
 )
+
+var globalConfig *config.Config
 
 // backupCmd represents the backup command
 var backupCmd = &cobra.Command{
@@ -27,6 +35,32 @@ var backupCmd = &cobra.Command{
 	Short: "Execute the backup.",
 	Long:  "Execute the backup. Used config can be overridden by providing arguments.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("backup called")
+		slog.Debug("start of backup command")
+
+		source.Prepare(globalConfig)
+		destination.Prepare(globalConfig)
+
+		slog.Info("TODO: Do backup")
+
+		slog.Debug("end of backup command")
 	},
+}
+
+func init() {
+	err := config.InitViper()
+	if err != nil {
+		slog.Error("error while initializing viper", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	globalConfig, err = config.New()
+	if err != nil {
+		slog.Error("error while initializing global config", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	logging.InitSlog(globalConfig.GetLogLevel())
+
+	slog.Debug("global config loaded", slog.Any("globalConfig", globalConfig))
+	slog.Debug("log level set", slog.String("logLevel", globalConfig.LogLevel))
 }

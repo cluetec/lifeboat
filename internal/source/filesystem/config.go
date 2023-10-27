@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-package cmd
+package filesystem
 
 import (
-	"os"
-
-	"github.com/spf13/cobra"
+	"fmt"
+	"github.com/spf13/viper"
+	"log/slog"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "lb",
-	Short: "Perform backups from any source to any destination.",
-	Long:  "Lifeboat is a general purpose backup tool which supports backups for arbitrary sources and destinations.",
+const Type = "filesystem"
+
+type Config struct {
+	path string
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
+func New() (*Config, error) {
+	var filesystemConfig Config
+
+	all := viper.AllSettings()
+	fmt.Printf("%v", all)
+
+	err := viper.UnmarshalKey("source", &filesystemConfig)
+
 	if err != nil {
-		os.Exit(1)
+		slog.Error("unable to decode config into filesystem source config", slog.Any("error", err))
+		return nil, err
 	}
-}
 
-func init() {
-	rootCmd.AddCommand(backupCmd)
+	return &filesystemConfig, nil
 }
