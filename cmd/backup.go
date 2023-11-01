@@ -37,8 +37,8 @@ var backupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Debug("start of backup command")
 
-		source.Prepare(globalConfig)
-		destination.Prepare(globalConfig)
+		source.Prepare(globalConfig.Source)
+		destination.Prepare(globalConfig.Destination)
 
 		slog.Info("TODO: Do backup")
 

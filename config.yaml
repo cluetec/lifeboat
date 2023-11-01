@@ -6,4 +6,4 @@ destination:
   type: filesystem
   path: destination
 
-logLevel: info
+logLevel: debug

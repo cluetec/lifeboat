@@ -17,23 +17,23 @@
 package filesystem
 
 import (
-	"github.com/spf13/viper"
+	"github.com/mitchellh/mapstructure"
 	"log/slog"
 )
 
 const Type = "filesystem"
 
 type Config struct {
-	path string
+	Path string
 }
 
-func New() (*Config, error) {
+func New(c map[string]interface{}) (*Config, error) {
 	var filesystemConfig Config
 
-	err := viper.UnmarshalKey("destination", &filesystemConfig)
+	err := mapstructure.Decode(c, &filesystemConfig)
 
 	if err != nil {
-		slog.Error("unable to decode config into filesystem source config", slog.Any("error", err))
+		slog.Error("unable to decode config into filesystem destination config", "error", err)
 		return nil, err
 	}
 

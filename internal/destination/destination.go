@@ -23,14 +23,9 @@ import (
 	"os"
 )
 
-type DestinationConfig struct {
-	Type string
-}
-
-func Prepare(globalConfig *config.Config) {
-
-	if globalConfig.Destination.(DestinationConfig).Type == filesystem.Type {
-		filesystemConfig, err := filesystem.New()
+func Prepare(c config.ResourceConfig) {
+	if c.Type == filesystem.Type {
+		filesystemConfig, err := filesystem.New(c.NestedConfig)
 		if err != nil {
 			slog.Error("error while initializing filesystem destination config", slog.Any("error", err))
 			os.Exit(1)

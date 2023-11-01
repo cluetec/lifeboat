@@ -22,21 +22,14 @@ import (
 	"strings"
 )
 
-type CustomConfigs map[string]interface{}
-
-//type SourceConfig struct {
-//	CustomConfigs
-//	Type string
-//}
-//
-//type DestinationConfig struct {
-//	CustomConfigs
-//	Type string
-//}
+type ResourceConfig struct {
+	Type         string
+	NestedConfig map[string]interface{} `mapstructure:",remain"`
+}
 
 type Config struct {
-	Source      CustomConfigs
-	Destination CustomConfigs
+	Source      ResourceConfig
+	Destination ResourceConfig
 	LogLevel    string
 }
 
@@ -68,7 +61,7 @@ func New() (*Config, error) {
 
 	err := viper.Unmarshal(&c)
 	if err != nil {
-		slog.Error("unable to decode into struct, %w", err)
+		slog.Error("unable to decode into struct", "error", err)
 		return nil, err
 	}
 
