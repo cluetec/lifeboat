@@ -1,6 +1,6 @@
 module github.com/cluetec/lifeboat
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/mitchellh/mapstructure v1.5.0

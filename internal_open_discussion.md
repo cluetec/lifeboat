@@ -16,6 +16,7 @@ For later:
 - [ ] Define multiple destinations
 - [ ] Azure Blob
   - [ ] Support additional auth mechanism
+  - [ ] Use azurite for testing: <mcr.microsoft.com/azure-storage/azurite>
 - [ ] Creating full-backups from
   - [ ] SSH/Rsync
   - [ ] MongoDB
