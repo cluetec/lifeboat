@@ -49,13 +49,13 @@ var backupCmd = &cobra.Command{
 func init() {
 	err := config.InitViper()
 	if err != nil {
-		slog.Error("error while initializing viper", slog.Any("error", err))
+		slog.Error("error while initializing viper", "error", err)
 		os.Exit(1)
 	}
 
 	globalConfig, err = config.New()
 	if err != nil {
-		slog.Error("error while initializing global config", slog.Any("error", err))
+		slog.Error("error while initializing global config", "error", err)
 		os.Exit(1)
 	}
 

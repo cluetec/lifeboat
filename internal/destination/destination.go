@@ -27,10 +27,10 @@ func Prepare(c config.ResourceConfig) {
 	if c.Type == filesystem.Type {
 		filesystemConfig, err := filesystem.New(c.NestedConfig)
 		if err != nil {
-			slog.Error("error while initializing filesystem destination config", slog.Any("error", err))
+			slog.Error("error while initializing filesystem destination config", "error", err)
 			os.Exit(1)
 		}
 
-		slog.Debug("filesystem destination config loaded", slog.Any("config", filesystemConfig))
+		slog.Debug("filesystem destination config loaded", "config", filesystemConfig)
 	}
 }
