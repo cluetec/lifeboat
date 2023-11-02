@@ -62,10 +62,13 @@ func (c *Config) DebugEnabled() bool {
 }
 
 func New() (*Config, error) {
-	var c Config
+	if err := initViper(); err != nil {
+		slog.Error("error while initializing viper", "error", err)
+		return nil, err
+	}
 
-	err := viper.Unmarshal(&c)
-	if err != nil {
+	var c Config
+	if err := viper.Unmarshal(&c); err != nil {
 		slog.Error("unable to decode into struct", "error", err)
 		return nil, err
 	}

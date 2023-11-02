@@ -22,7 +22,7 @@ import (
 	"strings"
 )
 
-func InitViper() error {
+func initViper() error {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AddConfigPath(".")

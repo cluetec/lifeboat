@@ -21,13 +21,10 @@ import (
 	"github.com/cluetec/lifeboat/internal/destination"
 	"github.com/cluetec/lifeboat/internal/logging"
 	"github.com/cluetec/lifeboat/internal/source"
+	"github.com/spf13/cobra"
 	"log/slog"
 	"os"
-
-	"github.com/spf13/cobra"
 )
-
-var globalConfig *config.Config
 
 // backupCmd represents the backup command
 var backupCmd = &cobra.Command{
@@ -35,32 +32,24 @@ var backupCmd = &cobra.Command{
 	Short: "Execute the backup.",
 	Long:  "Execute the backup. Used config can be overridden by providing arguments.",
 	Run: func(cmd *cobra.Command, args []string) {
+		c, err := config.New()
+		if err != nil {
+			slog.Error("error while initializing config", "error", err)
+			os.Exit(1)
+		}
+
+		logging.InitSlog(c.GetLogLevel())
+
+		slog.Debug("global config loaded", slog.Any("globalConfig", c))
+		slog.Debug("log level set", slog.String("logLevel", c.LogLevel))
+
 		slog.Debug("start of backup command")
 
-		source.Prepare(globalConfig.Source)
-		destination.Prepare(globalConfig.Destination)
+		source.Prepare(c.Source)
+		destination.Prepare(c.Destination)
 
 		slog.Info("TODO: Do backup")
 
 		slog.Debug("end of backup command")
 	},
-}
-
-func init() {
-	err := config.InitViper()
-	if err != nil {
-		slog.Error("error while initializing viper", "error", err)
-		os.Exit(1)
-	}
-
-	globalConfig, err = config.New()
-	if err != nil {
-		slog.Error("error while initializing global config", "error", err)
-		os.Exit(1)
-	}
-
-	logging.InitSlog(globalConfig.GetLogLevel())
-
-	slog.Debug("global config loaded", slog.Any("globalConfig", globalConfig))
-	slog.Debug("log level set", slog.String("logLevel", globalConfig.LogLevel))
 }
