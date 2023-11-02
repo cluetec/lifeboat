@@ -22,14 +22,19 @@ import (
 	"strings"
 )
 
-type ResourceConfig struct {
-	Type         string
-	NestedConfig map[string]any `mapstructure:",remain"`
+type SourceConfig struct {
+	Type           string
+	ResourceConfig map[string]any `mapstructure:",remain"`
+}
+
+type DestinationConfig struct {
+	Type           string
+	ResourceConfig map[string]any `mapstructure:",remain"`
 }
 
 type Config struct {
-	Source      ResourceConfig
-	Destination ResourceConfig
+	Source      SourceConfig
+	Destination DestinationConfig
 	LogLevel    string
 }
 

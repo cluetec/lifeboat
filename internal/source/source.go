@@ -23,9 +23,9 @@ import (
 	"os"
 )
 
-func Prepare(c config.ResourceConfig) {
+func Prepare(c config.SourceConfig) {
 	if c.Type == filesystem.Type {
-		filesystemConfig, err := filesystem.New(c.NestedConfig)
+		filesystemConfig, err := filesystem.New(c.ResourceConfig)
 		if err != nil {
 			slog.Error("error while initializing filesystem source config", "error", err)
 			os.Exit(1)
