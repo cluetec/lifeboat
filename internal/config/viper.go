@@ -23,7 +23,6 @@ import (
 )
 
 func InitViper() error {
-	//v := viper.New()
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AddConfigPath(".")

@@ -27,7 +27,7 @@ type Config struct {
 	Path string
 }
 
-func New(c map[string]interface{}) (*Config, error) {
+func New(c map[string]any) (*Config, error) {
 	var filesystemConfig Config
 
 	err := mapstructure.Decode(c, &filesystemConfig)

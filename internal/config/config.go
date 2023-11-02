@@ -24,7 +24,7 @@ import (
 
 type ResourceConfig struct {
 	Type         string
-	NestedConfig map[string]interface{} `mapstructure:",remain"`
+	NestedConfig map[string]any `mapstructure:",remain"`
 }
 
 type Config struct {
