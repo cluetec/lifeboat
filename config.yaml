@@ -1,0 +1,9 @@
+source:
+  type: filesystem
+  path: source
+
+destination:
+  type: filesystem
+  path: destination
+
+logLevel: debug
