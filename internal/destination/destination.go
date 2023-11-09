@@ -17,6 +17,7 @@
 package destination
 
 import (
+	"errors"
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/destination/filesystem"
 	"io"
@@ -29,6 +30,7 @@ type Destination struct {
 
 func New(c config.DestinationConfig) (*Destination, error) {
 	d := Destination{}
+
 	if c.Type == filesystem.Type {
 		filesystemConfig, err := filesystem.NewConfig(c.ResourceConfig)
 		if err != nil {
@@ -43,7 +45,9 @@ func New(c config.DestinationConfig) (*Destination, error) {
 			slog.Error("error while initializing writer interface for filesystem destination", "error", err)
 			return nil, err
 		}
+
+		return &d, nil
 	}
 
-	return &d, nil
+	return nil, errors.New("destination type not known")
 }
