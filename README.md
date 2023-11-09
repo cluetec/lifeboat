@@ -21,29 +21,31 @@ Destination storage systems:
 
 ## 🔥 Motivation
 
+## 💻 Installation
+
 ## ⚙️ Usage
 
-Lifeboat is designed as a CLI tool. That allows the user to use it in a large varient of environments like on a local machine, in a unix cronjob, in kubernetes, in a VM, where ever the user wants.
-As the tool needs a quite complex configuration it's possible to provide a config file. In addition it's also possible to put all configuration also in environment variables.
+Lifeboat is designed as a CLI tool. That allows the user to use it in a large varient of environments like on a local machine, in a unix cronjob, in kubernetes, in a VM, whereever the user wants.
+As the tool needs a quite complex configuration it's possible to provide a config file. In addition, it's also possible to provide all configuration via environment variables.
 
 TODO: put here cli help output
 
-### Configurations
+### Configuration
 
 The configurations is divided in three different parts:
 1. General configs
 2. Source system configs
 3. Destination storage configs
 
-#### General configs
+#### General configuration
 
 TODO PUT HERE TABLE WITH THE CONFIGS
 
-#### Source system configs
+#### Source system configuration
 
 TODO PUT HERE SUBSECTIONS WITH TABLES OF THE CONFIGS
 
-#### Destination storage configs
+#### Destination storage configuration
 
 TODO PUT HERE SUBSECTIONS WITH TABLES OF THE CONFIGS
 
