@@ -16,10 +16,40 @@
 
 package filesystem
 
+import (
+	"log/slog"
+	"os"
+)
+
 type Reader struct {
-	Config *Config
+	file *os.File
 }
 
-func (r *Reader) ProcessBackup() []byte {
-	return []byte{}
+func NewReader(c *Config) (*Reader, error) {
+	r := Reader{}
+
+	f, err := os.Open(c.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	r.file = f
+
+	return &r, nil
+}
+
+func (r *Reader) Read(b []byte) (int, error) {
+	return r.file.Read(b)
+}
+
+func (r *Reader) Close() error {
+	slog.Debug("closing filesystem reader")
+
+	if r.file != nil {
+		if err := r.file.Close(); err != nil {
+			return err
+		}
+		r.file = nil
+	}
+	return nil
 }

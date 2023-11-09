@@ -16,10 +16,50 @@
 
 package filesystem
 
-type Storeman struct {
-	Config Config
+import (
+	"errors"
+	"log/slog"
+	"os"
+)
+
+type Writer struct {
+	file *os.File
 }
 
-func (r *Storeman) StoreBackup() []byte {
-	return []byte{}
+func NewWriter(c *Config) (*Writer, error) {
+	w := Writer{}
+
+	// Check if destination file already exists
+	_, err := os.Stat(c.Path)
+	if err == nil {
+		return nil, errors.New("destination file already exists")
+	} else if !errors.Is(err, os.ErrNotExist) {
+		slog.Error("error while checking if destination file already exists", "error", err)
+		return nil, err
+	}
+
+	// Create file
+	f, err := os.Create(c.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	w.file = f
+	return &w, nil
+}
+
+func (w *Writer) Write(b []byte) (int, error) {
+	return w.file.Write(b)
+}
+
+func (w *Writer) Close() error {
+	slog.Debug("closing filesystem writer")
+
+	if w.file != nil {
+		if err := w.file.Close(); err != nil {
+			return err
+		}
+		w.file = nil
+	}
+	return nil
 }
