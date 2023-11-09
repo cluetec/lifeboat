@@ -19,18 +19,31 @@ package destination
 import (
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/destination/filesystem"
+	"io"
 	"log/slog"
-	"os"
 )
 
-func Prepare(c config.DestinationConfig) {
+type Destination struct {
+	Writer io.WriteCloser
+}
+
+func New(c config.DestinationConfig) (*Destination, error) {
+	d := Destination{}
 	if c.Type == filesystem.Type {
-		filesystemConfig, err := filesystem.New(c.ResourceConfig)
+		filesystemConfig, err := filesystem.NewConfig(c.ResourceConfig)
 		if err != nil {
 			slog.Error("error while initializing filesystem destination config", "error", err)
-			os.Exit(1)
+			return nil, err
 		}
 
 		slog.Debug("filesystem destination config loaded", "config", filesystemConfig)
+
+		d.Writer, err = filesystem.NewWriter(filesystemConfig)
+		if err != nil {
+			slog.Error("error while initializing writer interface for filesystem destination", "error", err)
+			return nil, err
+		}
 	}
+
+	return &d, nil
 }

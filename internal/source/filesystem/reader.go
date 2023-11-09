@@ -17,25 +17,39 @@
 package filesystem
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"log/slog"
+	"os"
 )
 
-const Type = "filesystem"
-
-type Config struct {
-	Path string
+type Reader struct {
+	file *os.File
 }
 
-func NewConfig(c map[string]any) (*Config, error) {
-	var filesystemConfig Config
+func NewReader(c *Config) (*Reader, error) {
+	r := Reader{}
 
-	err := mapstructure.Decode(c, &filesystemConfig)
-
+	f, err := os.Open(c.Path)
 	if err != nil {
-		slog.Error("unable to decode config into filesystem source config", "error", err)
 		return nil, err
 	}
 
-	return &filesystemConfig, nil
+	r.file = f
+
+	return &r, nil
+}
+
+func (r *Reader) Read(b []byte) (int, error) {
+	return r.file.Read(b)
+}
+
+func (r *Reader) Close() error {
+	slog.Debug("closing filesystem reader")
+
+	if r.file != nil {
+		if err := r.file.Close(); err != nil {
+			return err
+		}
+		r.file = nil
+	}
+	return nil
 }

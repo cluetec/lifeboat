@@ -2,13 +2,13 @@
 
 ## Planned features
 
-- [ ] Step: 1
+- [x] Step: 1
   - [x] Init cobra & viper setup
-  - [ ] Dynamic config loading with viper (`type`)
-- [ ] Step: 2
-  - [ ] Init slog setup
-- [ ] Implement Filesystem to Filesystem backup
-  - [ ] Think about the interfaces
+  - [x] Dynamic config loading with viper (`type`)
+- [x] Step: 2
+  - [x] Init slog setup
+- [x] Implement Filesystem to Filesystem backup
+  - [x] Think about the interfaces
 - [ ] Implement Vault to Filesystem backup
 
 For later:

@@ -19,18 +19,31 @@ package source
 import (
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/source/filesystem"
+	"io"
 	"log/slog"
-	"os"
 )
 
-func Prepare(c config.SourceConfig) {
+type Source struct {
+	Reader io.ReadCloser
+}
+
+func New(c config.SourceConfig) (*Source, error) {
+	s := Source{}
 	if c.Type == filesystem.Type {
-		filesystemConfig, err := filesystem.New(c.ResourceConfig)
+		filesystemConfig, err := filesystem.NewConfig(c.ResourceConfig)
 		if err != nil {
 			slog.Error("error while initializing filesystem source config", "error", err)
-			os.Exit(1)
+			return nil, err
 		}
 
 		slog.Debug("filesystem source config loaded", "config", filesystemConfig)
+
+		s.Reader, err = filesystem.NewReader(filesystemConfig)
+		if err != nil {
+			slog.Error("error while initializing reader interface for filesystem source", "error", err)
+			return nil, err
+		}
 	}
+
+	return &s, nil
 }

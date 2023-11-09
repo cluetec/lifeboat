@@ -22,8 +22,8 @@ import (
 	"github.com/cluetec/lifeboat/internal/logging"
 	"github.com/cluetec/lifeboat/internal/source"
 	"github.com/spf13/cobra"
+	"io"
 	"log/slog"
-	"os"
 )
 
 // backupCmd represents the backup command
@@ -31,11 +31,11 @@ var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Execute the backup.",
 	Long:  "Execute the backup. Used config can be overridden by providing arguments.",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.New()
 		if err != nil {
 			slog.Error("error while initializing config", "error", err)
-			os.Exit(1)
+			return err
 		}
 
 		logging.InitSlog(c.GetLogLevel())
@@ -45,11 +45,37 @@ var backupCmd = &cobra.Command{
 
 		slog.Debug("start of backup command")
 
-		source.Prepare(c.Source)
-		destination.Prepare(c.Destination)
+		s, err := source.New(c.Source)
+		if err != nil {
+			slog.Error("error while initializing source", "error", err)
+			return err
+		}
+		defer func() {
+			err := s.Reader.Close()
+			if err != nil {
+				slog.Error("error while closing source reader", "error", err)
+			}
+		}()
 
-		slog.Info("TODO: Do backup")
+		d, err := destination.New(c.Destination)
+		if err != nil {
+			slog.Error("error while initializing destination", "error", err)
+			return err
+		}
+		defer func() {
+			err := d.Writer.Close()
+			if err != nil {
+				slog.Error("error while closing destination writer", "error", err)
+			}
+		}()
 
-		slog.Debug("end of backup command")
+		n, err := io.Copy(d.Writer, s.Reader)
+		if err != nil {
+			slog.Error("error while doing the backup", "error", err)
+			return err
+		}
+
+		slog.Info("Backup successful", "writtenBytes", n)
+		return nil
 	},
 }
