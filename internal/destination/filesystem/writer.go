@@ -18,6 +18,7 @@ package filesystem
 
 import (
 	"errors"
+	globalConfig "github.com/cluetec/lifeboat/internal/config"
 	"log/slog"
 	"os"
 )
@@ -26,11 +27,17 @@ type Writer struct {
 	file *os.File
 }
 
-func NewWriter(c *Config) (*Writer, error) {
-	w := Writer{}
+func NewWriter(c *globalConfig.ResourceConfig) (*Writer, error) {
+	rc, err := newConfig(c)
+	if err != nil {
+		slog.Error("error while initializing filesystem destination config", "error", err)
+		return nil, err
+	}
+
+	slog.Debug("filesystem destination config loaded", "config", rc)
 
 	// Check if destination file already exists
-	_, err := os.Stat(c.Path)
+	_, err = os.Stat(rc.Path)
 	if err == nil {
 		return nil, errors.New("destination file already exists")
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -39,16 +46,16 @@ func NewWriter(c *Config) (*Writer, error) {
 	}
 
 	// Create file
-	f, err := os.Create(c.Path)
+	f, err := os.Create(rc.Path)
 	if err != nil {
 		return nil, err
 	}
 
-	w.file = f
-	return &w, nil
+	return &Writer{file: f}, nil
 }
 
 func (w *Writer) Write(b []byte) (int, error) {
+	slog.Debug("filesystem destination write got called")
 	return w.file.Write(b)
 }
 

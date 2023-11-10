@@ -17,25 +17,26 @@
 package filesystem
 
 import (
+	globalConfig "github.com/cluetec/lifeboat/internal/config"
 	"github.com/mitchellh/mapstructure"
 	"log/slog"
 )
 
 const Type = "filesystem"
 
-type Config struct {
+type config struct {
 	Path string
 }
 
-func NewConfig(c map[string]any) (*Config, error) {
-	var filesystemConfig Config
+func newConfig(c *globalConfig.ResourceConfig) (*config, error) {
+	var sourceConfig config
 
-	err := mapstructure.Decode(c, &filesystemConfig)
+	err := mapstructure.Decode(c, &sourceConfig)
 
 	if err != nil {
 		slog.Error("unable to decode config into filesystem source config", "error", err)
 		return nil, err
 	}
 
-	return &filesystemConfig, nil
+	return &sourceConfig, nil
 }

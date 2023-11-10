@@ -30,24 +30,20 @@ type Destination struct {
 
 func New(c config.DestinationConfig) (*Destination, error) {
 	d := Destination{}
+	var err error
 
-	if c.Type == filesystem.Type {
-		filesystemConfig, err := filesystem.NewConfig(c.ResourceConfig)
-		if err != nil {
-			slog.Error("error while initializing filesystem destination config", "error", err)
-			return nil, err
-		}
-
-		slog.Debug("filesystem destination config loaded", "config", filesystemConfig)
-
-		d.Writer, err = filesystem.NewWriter(filesystemConfig)
-		if err != nil {
-			slog.Error("error while initializing writer interface for filesystem destination", "error", err)
-			return nil, err
-		}
-
-		return &d, nil
+	switch {
+	case c.Type == filesystem.Type:
+		d.Writer, err = filesystem.NewWriter(&c.ResourceConfig)
+	}
+	if err != nil {
+		slog.Error("error while initializing writer interface for destination system", "destinationType", c.Type, "error", err)
+		return nil, err
 	}
 
-	return nil, errors.New("destination type not known")
+	if d.Writer == nil {
+		return nil, errors.New("destination type not known")
+	}
+
+	return &d, nil
 }

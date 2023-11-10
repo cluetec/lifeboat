@@ -30,23 +30,29 @@ type Source struct {
 
 func New(c config.SourceConfig) (*Source, error) {
 	s := Source{}
+	var err error
 
-	if c.Type == filesystem.Type {
-		filesystemConfig, err := filesystem.NewConfig(c.ResourceConfig)
-		if err != nil {
-			slog.Error("error while initializing filesystem source config", "error", err)
-			return nil, err
-		}
-
-		slog.Debug("filesystem source config loaded", "config", filesystemConfig)
-
-		s.Reader, err = filesystem.NewReader(filesystemConfig)
-		if err != nil {
-			slog.Error("error while initializing reader interface for filesystem source", "error", err)
-			return nil, err
-		}
-		return &s, nil
+	switch {
+	case c.Type == filesystem.Type:
+		s.Reader, err = filesystem.NewReader(&c.ResourceConfig)
+	}
+	if err != nil {
+		slog.Error("error while initializing reader interface for source system", "sourceType", c.Type, "error", err)
+		return nil, err
 	}
 
-	return nil, errors.New("source type not known")
+	if s.Reader == nil {
+		return nil, errors.New("source type not known")
+	}
+
+	return &s, nil
 }
+
+//
+//case c.Type == hashicorpvault.Type:
+//s.Reader, err = hashicorpvault.NewReader(&c.ResourceConfig)
+//if err != nil {
+//slog.Error("error while initializing reader interface for source system", "sourceType", hashicorpvault.Type, "error", err)
+//return nil, err
+//}
+//return &s, nil
