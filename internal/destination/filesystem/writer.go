@@ -27,17 +27,17 @@ type Writer struct {
 	file *os.File
 }
 
-func NewWriter(c *globalConfig.ResourceConfig) (*Writer, error) {
-	rc, err := newConfig(c)
+func NewWriter(rc *globalConfig.ResourceConfig) (*Writer, error) {
+	c, err := newConfig(rc)
 	if err != nil {
 		slog.Error("error while initializing filesystem destination config", "error", err)
 		return nil, err
 	}
 
-	slog.Debug("filesystem destination config loaded", "config", rc)
+	slog.Debug("filesystem destination config loaded", "config", c)
 
 	// Check if destination file already exists
-	_, err = os.Stat(rc.Path)
+	_, err = os.Stat(c.Path)
 	if err == nil {
 		return nil, errors.New("destination file already exists")
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -46,7 +46,7 @@ func NewWriter(c *globalConfig.ResourceConfig) (*Writer, error) {
 	}
 
 	// Create file
-	f, err := os.Create(rc.Path)
+	f, err := os.Create(c.Path)
 	if err != nil {
 		return nil, err
 	}

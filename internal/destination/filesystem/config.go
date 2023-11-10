@@ -28,15 +28,15 @@ type config struct {
 	Path string
 }
 
-func newConfig(c *globalConfig.ResourceConfig) (*config, error) {
-	var destinationConfig config
+func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
+	var c config
 
-	err := mapstructure.Decode(c, &destinationConfig)
+	err := mapstructure.Decode(rc, &c)
 
 	if err != nil {
 		slog.Error("unable to decode config into filesystem destination config", "error", err)
 		return nil, err
 	}
 
-	return &destinationConfig, nil
+	return &c, nil
 }

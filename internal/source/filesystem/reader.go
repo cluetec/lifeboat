@@ -26,8 +26,8 @@ type Reader struct {
 	file *os.File
 }
 
-func NewReader(c *globalConfig.ResourceConfig) (*Reader, error) {
-	rc, err := newConfig(c)
+func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
+	c, err := newConfig(rc)
 	if err != nil {
 		slog.Error("error while initializing filesystem source config", "error", err)
 		return nil, err
@@ -35,7 +35,7 @@ func NewReader(c *globalConfig.ResourceConfig) (*Reader, error) {
 
 	slog.Debug("filesystem source config loaded", "config", rc)
 
-	f, err := os.Open(rc.Path)
+	f, err := os.Open(c.Path)
 	if err != nil {
 		return nil, err
 	}
