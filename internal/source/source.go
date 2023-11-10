@@ -47,12 +47,3 @@ func New(c config.SourceConfig) (*Source, error) {
 
 	return &s, nil
 }
-
-//
-//case c.Type == hashicorpvault.Type:
-//s.Reader, err = hashicorpvault.NewReader(&c.ResourceConfig)
-//if err != nil {
-//slog.Error("error while initializing reader interface for source system", "sourceType", hashicorpvault.Type, "error", err)
-//return nil, err
-//}
-//return &s, nil
