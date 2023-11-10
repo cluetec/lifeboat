@@ -25,7 +25,7 @@ Destination storage systems:
 
 ## ⚙️ Usage
 
-Lifeboat is designed as a CLI tool. That allows the user to use it in a large varient of environments like on a local machine, in a unix cronjob, in kubernetes, in a VM, whereever the user wants.
+Lifeboat is a CLI tool which makes it possible to use it in a various kind of environments like on a local machine, in a Unix cronjob, in Kubernetes, in a VM, whereever the user wants.
 As the tool needs a quite complex configuration it's possible to provide a config file. In addition, it's also possible to provide all configuration via environment variables.
 
 TODO: put here cli help output
