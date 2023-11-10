@@ -17,6 +17,7 @@
 package source
 
 import (
+	"errors"
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/source/filesystem"
 	"io"
@@ -29,6 +30,7 @@ type Source struct {
 
 func New(c config.SourceConfig) (*Source, error) {
 	s := Source{}
+
 	if c.Type == filesystem.Type {
 		filesystemConfig, err := filesystem.NewConfig(c.ResourceConfig)
 		if err != nil {
@@ -43,7 +45,8 @@ func New(c config.SourceConfig) (*Source, error) {
 			slog.Error("error while initializing reader interface for filesystem source", "error", err)
 			return nil, err
 		}
+		return &s, nil
 	}
 
-	return &s, nil
+	return nil, errors.New("source type not known")
 }
