@@ -17,6 +17,7 @@
 package filesystem
 
 import (
+	globalConfig "github.com/cluetec/lifeboat/internal/config"
 	"log/slog"
 	"os"
 )
@@ -25,20 +26,25 @@ type Reader struct {
 	file *os.File
 }
 
-func NewReader(c *Config) (*Reader, error) {
-	r := Reader{}
+func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
+	c, err := newConfig(rc)
+	if err != nil {
+		slog.Error("error while initializing filesystem source config", "error", err)
+		return nil, err
+	}
+
+	slog.Debug("filesystem source config loaded", "config", rc)
 
 	f, err := os.Open(c.Path)
 	if err != nil {
 		return nil, err
 	}
 
-	r.file = f
-
-	return &r, nil
+	return &Reader{file: f}, nil
 }
 
 func (r *Reader) Read(b []byte) (int, error) {
+	slog.Debug("filesystem source read got called")
 	return r.file.Read(b)
 }
 
