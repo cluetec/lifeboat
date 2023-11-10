@@ -32,7 +32,7 @@ TODO: put here cli help output
 
 ### Configuration
 
-The configurations is divided in three different parts:
+The configuration is divided in three different parts:
 1. General configs
 2. Source system configs
 3. Destination storage configs
