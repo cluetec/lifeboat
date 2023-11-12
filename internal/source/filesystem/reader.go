@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -95,7 +96,7 @@ func (r *Reader) prepareDir(srcPath string) error {
 	gw := gzip.NewWriter(mw)
 	tw := tar.NewWriter(gw)
 
-	err := filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.WalkDir(srcPath, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -105,7 +106,12 @@ func (r *Reader) prepareDir(srcPath string) error {
 			return nil
 		}
 
-		header, err := tar.FileInfoHeader(info, info.Name())
+		fileInfo, err := entry.Info()
+		if err != nil {
+			return err
+		}
+
+		header, err := tar.FileInfoHeader(fileInfo, entry.Name())
 		if err != nil {
 			return err
 		}
@@ -117,7 +123,7 @@ func (r *Reader) prepareDir(srcPath string) error {
 			return err
 		}
 
-		if !info.IsDir() {
+		if !entry.IsDir() {
 			file, err := os.Open(path)
 			if err != nil {
 				return err
@@ -135,11 +141,11 @@ func (r *Reader) prepareDir(srcPath string) error {
 		return err
 	}
 
-	if err := gw.Close(); err != nil {
+	if err := tw.Close(); err != nil {
 		return err
 	}
 
-	if err := tw.Close(); err != nil {
+	if err := gw.Close(); err != nil {
 		return err
 	}
 
