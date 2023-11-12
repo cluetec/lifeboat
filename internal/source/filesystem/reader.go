@@ -17,13 +17,21 @@
 package filesystem
 
 import (
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
+	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
+
+	globalConfig "github.com/cluetec/lifeboat/internal/config"
 )
 
 type Reader struct {
-	file *os.File
+	file        *os.File
+	archivedDir *bytes.Buffer
 }
 
 func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
@@ -35,17 +43,31 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 
 	slog.Debug("filesystem source config loaded", "config", rc)
 
-	f, err := os.Open(c.Path)
+	// check if path is a directory
+	fileInfo, err := os.Stat(c.Path)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Reader{file: f}, nil
+	r := &Reader{}
+
+	if fileInfo.IsDir() {
+		r.prepareDir(c.Path)
+	} else {
+		r.prepareFile(c.Path)
+	}
+
+	return r, nil
 }
 
 func (r *Reader) Read(b []byte) (int, error) {
 	slog.Debug("filesystem source read got called")
-	return r.file.Read(b)
+
+	if r.file != nil {
+		return r.file.Read(b)
+	} else {
+		return r.archivedDir.Read(b)
+	}
 }
 
 func (r *Reader) Close() error {
@@ -57,5 +79,83 @@ func (r *Reader) Close() error {
 		}
 		r.file = nil
 	}
+	return nil
+}
+
+// prepareDir reads in the source directory for the backup as a tar archive and sets
+// the contents as a bytes.Buffer to the Reader so it can be written during the backup
+func (r *Reader) prepareDir(srcPath string) error {
+	slog.Debug("preparing filesystem directory backup")
+	var buf bytes.Buffer
+
+	mw := io.MultiWriter(&buf)
+
+	gw := gzip.NewWriter(mw)
+	tw := tar.NewWriter(gw)
+
+	err := filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// exclude root dir
+		if path == srcPath {
+			return nil
+		}
+
+		header, err := tar.FileInfoHeader(info, info.Name())
+		if err != nil {
+			return err
+		}
+
+		// preserve folder structure inside tar archive, f.e. for files in nested directories
+		header.Name = strings.TrimPrefix(strings.Replace(path, srcPath, "", -1), string(filepath.Separator))
+
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			if _, err := io.Copy(tw, file); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := gw.Close(); err != nil {
+		return err
+	}
+
+	if err := tw.Close(); err != nil {
+		return err
+	}
+
+	r.archivedDir = &buf
+
+	return nil
+}
+
+// prepareFile opens the source file with the given path and sets it at the reader
+// in preparation for the backup
+func (r *Reader) prepareFile(srcPath string) error {
+	slog.Debug("preparing filesystem file backup")
+	f, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+
+	r.file = f
+
 	return nil
 }
