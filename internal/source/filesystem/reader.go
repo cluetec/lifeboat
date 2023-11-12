@@ -43,7 +43,6 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 
 	slog.Debug("filesystem source config loaded", "config", rc)
 
-	// check if path is a directory
 	fileInfo, err := os.Stat(c.Path)
 	if err != nil {
 		return nil, err
