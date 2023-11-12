@@ -52,9 +52,12 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 	r := &Reader{}
 
 	if fileInfo.IsDir() {
-		r.prepareDir(c.Path)
+		err = r.prepareDir(c.Path)
 	} else {
-		r.prepareFile(c.Path)
+		err = r.prepareFile(c.Path)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	return r, nil
