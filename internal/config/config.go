@@ -63,8 +63,8 @@ func (c *Config) DebugEnabled() bool {
 	return strings.ToLower(c.LogLevel) == "debug"
 }
 
-func New() (*Config, error) {
-	if err := initViper(); err != nil {
+func New(cfgFilePath string) (*Config, error) {
+	if err := initViper(cfgFilePath); err != nil {
 		slog.Error("error while initializing viper", "error", err)
 		return nil, err
 	}

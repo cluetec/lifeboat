@@ -26,13 +26,15 @@ import (
 	"log/slog"
 )
 
+var cfgFilePath string
+
 // backupCmd represents the backup command
 var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Execute the backup.",
 	Long:  "Execute the backup. Used config can be overridden by providing arguments.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := config.New()
+		c, err := config.New(cfgFilePath)
 		if err != nil {
 			slog.Error("error while initializing config", "error", err)
 			return err
@@ -78,4 +80,13 @@ var backupCmd = &cobra.Command{
 		slog.Info("Backup successful", "writtenBytes", n)
 		return nil
 	},
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(
+		&cfgFilePath,
+		"config",
+		"",
+		"path to config file (default: ./config.yaml)",
+	)
 }
