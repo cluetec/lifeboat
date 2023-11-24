@@ -70,8 +70,8 @@ $ SOURCE_TOKEN=$(cat ./vault-token.txt) lb backup --config ./backup-config.yaml
 To clean up everything afterwards, we just need to execute the following commands:
 
 ```shell
-#$ docker-compose down
-#$ rm -rf .data
+$ docker-compose down
+$ rm -rf .data
 $ rm -rf backup-destination/vault-backup.snap
 ```
 
