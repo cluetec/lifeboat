@@ -1,6 +1,6 @@
 # Sample: Backup HashiCorp Vault
 
-In this example we will show you how to backup an HashiCorp Vault instance.
+In this example we will show you how to back up an HashiCorp Vault instance.
 
 ## Requirements
 
@@ -47,9 +47,9 @@ something around 1 minute until the init script finishes.
 
 ```shell
 $ docker-compose ps --all
-NAME                                          IMAGE                        COMMAND                  SERVICE      CREATED          STATUS                     PORTS
-hashicorp-vault-vault-1                       hashicorp/vault:1.15         "vault server -confi…"   vault        59 seconds ago   Up 58 seconds              0.0.0.0:8200->8200/tcp
-hashicorp-vault-vault-init-1                  hashicorp-vault-vault-init   "bash /init.sh"          vault-init   59 seconds ago   Exited (0) 5 seconds ago
+NAME                           IMAGE                        COMMAND                  SERVICE      CREATED          STATUS                     PORTS
+hashicorp-vault-vault-1        hashicorp/vault:1.15         "vault server -confi…"   vault        59 seconds ago   Up 58 seconds              0.0.0.0:8200->8200/tcp
+hashicorp-vault-vault-init-1   hashicorp-vault-vault-init   "bash /init.sh"          vault-init   59 seconds ago   Exited (0) 5 seconds ago
 ```
 
 ### 3. Run lifeboat to create the backup
@@ -74,7 +74,6 @@ To clean up everything afterwards, we just need to execute the following command
 #$ rm -rf .data
 $ rm -rf backup-destination/vault-backup.snap
 ```
-
 
 ## Restore
 

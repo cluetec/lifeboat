@@ -34,9 +34,9 @@ until $(vault status > /dev/null 2>&1); do
     fi
 
     if [ ${attempt_counter} -eq ${max_attempts} ]; then
-      echo ""
-      echo "ERROR: The Vault was not started in time. Maximum connection attempts of ${max_attempts} have been reached and $((sleep_seconds*max_attempts)) seconds have been waited. Please have a look at the Vault instance to see why it did not start in time."
-      exit 1
+        echo ""
+        echo "ERROR: The Vault was not started in time. Maximum connection attempts of ${max_attempts} have been reached and $((sleep_seconds*max_attempts)) seconds have been waited. Please have a look at the Vault instance to see why it did not start in time."
+        exit 1
     fi
 
     echo "Waiting until vault is up..."
@@ -71,10 +71,10 @@ unsealKeys=$(echo "$initOutput" | grep "^Unseal Key ")
 # Get root token
 while IFS= read -r SINGLELINE
 do
-  re="Initial Root Token: "
-  if [[ "${SINGLELINE}" =~ $re ]]; then
-    rootToken=$(echo "${SINGLELINE}" | sed "s/${re}//")
-  fi
+    re="Initial Root Token: "
+    if [[ "${SINGLELINE}" =~ $re ]]; then
+        rootToken=$(echo "${SINGLELINE}" | sed "s/${re}//")
+    fi
 done << EOF
 $initOutput
 EOF
@@ -101,9 +101,9 @@ vault secrets enable -version=2 -path="secret" kv
 amountOfSecrets=1000
 secretLength=2000
 for i in `seq 2 $amountOfSecrets`; do
-  printf "\nPut secret number ${i} into vault:\n"
-  superSecureSecret=$(sed "s/[^a-zA-Z0-9]//g" <<< $(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%*()-+' | fold -w ${secretLength} | head -n 1))
-  echo "${superSecureSecret}" | vault kv put secret/${i} content=-
+    printf "\nPut secret number ${i} into vault:\n"
+    superSecureSecret=$(sed "s/[^a-zA-Z0-9]//g" <<< $(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%*()-+' | fold -w ${secretLength} | head -n 1))
+    echo "${superSecureSecret}" | vault kv put secret/${i} content=-
 done
 
 printf "\nSuccessful initialized vault and put ${amountOfSecrets} with a length of ${secretLength} random chars into vault\n"
