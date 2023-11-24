@@ -1,0 +1,4 @@
+.data/
+backup-destination/*.snap
+vault-token.txt
+vault-unseal-keys.txt
