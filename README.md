@@ -7,21 +7,24 @@ Lifeboat enables the user to create a backup for a range of different systems (e
 
 Source systems:
 
-- Local filesystem
-- PostgeSQL (Not implemented yet)
-- MongoDB (Not implemented yet)
-- HashiCorp Vault (Not implemented yet)
+- [x] Local filesystem
+- [ ] PostgeSQL (Not implemented yet)
+- [ ] MongoDB (Not implemented yet)
+- [ ] HashiCorp Vault (Not implemented yet)
 
 Destination storage systems:
 
-- Local filesystem
-- S3 Bucket (Not implemented yet)
-- Azure Storage Account (Not implemented yet)
-- S/FTP (Not implemented yet)
+- [x] Local filesystem
+- [ ] S3 Bucket (Not implemented yet)
+- [ ] Azure Storage Account (Not implemented yet)
+- [ ] S/FTP (Not implemented yet)
 
 ## 🔥 Motivation
 
 ## 💻 Installation
+
+At the moment we don't provide any installation methods.
+As we just started the project, we will start with providing the compiled binaries with in the GitHub Releases..
 
 ## ⚙️ Usage
 
