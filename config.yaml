@@ -12,7 +12,8 @@ source:
 
   hashicorpvault:
     token:
-    address:
+    authMethod: kubernetes
+    address: https://localhost:8200
 
 destination:
   type: filesystem

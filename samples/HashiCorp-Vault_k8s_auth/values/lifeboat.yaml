@@ -1,0 +1,16 @@
+configuration:
+  source:
+    type: hashicorpvault
+    address: http://127.0.0.1:8200
+
+  destination:
+    type: filesystem
+    path: /backups/vault-backup.snap
+
+image:
+  tag: local
+  pullPolicy: Always
+
+storage:
+  enabled: true
+  size: 50Mi

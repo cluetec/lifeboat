@@ -1,0 +1,27 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: lifeboat-hashicorp-vault2
+
+agents: 3
+
+# registries:
+  # create:
+  #   name: registry.localhost
+  #   host: "0.0.0.0"
+  #   hostPort: "5000"
+
+  # use:
+  #   - k3d-local-registry:5000
+
+network: k3d
+
+# options:
+#   k3s:
+#     extraArgs:
+#     - arg: --kubelet-arg=feature-gates=KubeletInUserNamespace=true
+#       nodeFilters:
+#         - server:*
+# hostAliases:
+#   - ip: 10.89.0.1
+#     name: hosts.container.internal
