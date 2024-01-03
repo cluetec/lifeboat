@@ -20,12 +20,12 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
 	globalConfig "github.com/cluetec/lifeboat/internal/config"
 )
@@ -111,19 +111,56 @@ func (r *Reader) prepareDir(srcPath string) error {
 			return err
 		}
 
-		header, err := tar.FileInfoHeader(fileInfo, entry.Name())
+		// resolve symlinks
+		if entry.Type()&fs.ModeSymlink == fs.ModeSymlink {
+			resolvedPath, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
+			if !filepath.IsAbs(resolvedPath) {
+				path = fmt.Sprintf("%s/%s", srcPath, resolvedPath)
+			} else {
+				path = resolvedPath
+			}
+
+			fileInfo, err = os.Stat(path)
+			if err != nil {
+				return err
+			}
+		}
+
+		slog.Info("walking...", "path", path, "fileInfo", fileInfo)
+
+		header, err := tar.FileInfoHeader(fileInfo, fileInfo.Name())
 		if err != nil {
 			return err
 		}
 
 		// preserve folder structure inside tar archive, f.e. for files in nested directories
-		header.Name = strings.TrimPrefix(strings.Replace(path, srcPath, "", -1), string(filepath.Separator))
+		header.Name, err = filepath.Rel(srcPath, path)
+		if err != nil {
+			return err
+		}
+
+		slog.Info("writing header", "header", header)
 
 		if err := tw.WriteHeader(header); err != nil {
 			return err
 		}
 
-		if !entry.IsDir() {
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			link, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
+
+			slog.Info("writing link", "link", []byte(link))
+
+			if _, err := tw.Write([]byte(link)); err != nil {
+				return err
+			}
+
+		} else if !entry.IsDir() {
 			file, err := os.Open(path)
 			if err != nil {
 				return err
