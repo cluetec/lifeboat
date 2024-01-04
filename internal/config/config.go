@@ -22,14 +22,16 @@ import (
 	"strings"
 )
 
+type ResourceConfig map[string]any
+
 type SourceConfig struct {
 	Type           string
-	ResourceConfig map[string]any `mapstructure:",remain"`
+	ResourceConfig ResourceConfig `mapstructure:",remain"`
 }
 
 type DestinationConfig struct {
 	Type           string
-	ResourceConfig map[string]any `mapstructure:",remain"`
+	ResourceConfig ResourceConfig `mapstructure:",remain"`
 }
 
 type Config struct {

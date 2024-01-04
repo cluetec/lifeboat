@@ -17,33 +17,38 @@
 package destination
 
 import (
-	"errors"
 	"github.com/cluetec/lifeboat/internal/config"
-	"github.com/cluetec/lifeboat/internal/destination/filesystem"
-	"io"
-	"log/slog"
+	"reflect"
+	"testing"
 )
 
-type Destination struct {
-	Writer io.WriteCloser
-}
-
-func New(c config.DestinationConfig) (*Destination, error) {
-	d := Destination{}
-	var err error
-
-	switch {
-	case c.Type == filesystem.Type:
-		d.Writer, err = filesystem.NewWriter(&c.ResourceConfig)
+func TestNew(t *testing.T) {
+	type args struct {
+		c config.DestinationConfig
 	}
-	if err != nil {
-		slog.Error("error while initializing writer interface for destination system", "destinationType", c.Type, "error", err)
-		return nil, err
+	tests := []struct {
+		name    string
+		args    args
+		want    *Destination
+		wantErr bool
+	}{
+		{
+			name:    "Throw error if type is not known",
+			args:    args{c: config.DestinationConfig{Type: "not-known-type"}},
+			want:    nil,
+			wantErr: true,
+		},
 	}
-
-	if d.Writer == nil {
-		return nil, errors.New("destination type not known")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := New(tt.args.c)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
-
-	return &d, nil
 }

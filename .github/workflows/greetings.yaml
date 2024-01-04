@@ -29,15 +29,15 @@ jobs:
       pull-requests: write  # for actions/first-interaction to comment on first PR
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423 # v2.6.0
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
         with:
           allowed-endpoints: >
             api.github.com:443
           disable-sudo: true
           disable-telemetry: true
           egress-policy: block
-      - uses: actions/first-interaction@1dbfe1ba5525b8257e1f259b09745bee346d62d8 # v1.2.0
+      - uses: actions/first-interaction@34f15e814fe48ac9312ccf29db4e74fa767cbab7 # v1.3.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: "Thanks for your contribution 🔥 We will take a look asap 🚀\n\nIn the meantime we recommend each new contribute to have a look at the [contribution guide](https://github.com/cluetec/lifeboat/CONTRIBUTING.md)."
-          pr-message: "Thanks for your contribution 🔥 We will take a look asap 🚀\n\nIn the meantime we recommend each new contribute to have a look at the [contribution guide](https://github.com/cluetec/lifeboat/CONTRIBUTING.md)."
+          issue-message: "Thank you for your contribution 🔥 We will look into this as soon as possible 🚀\n\n In the meantime, we recommend every new contributor to take a look at the [Contributor Guide](https://github.com/cluetec/lifeboat/CONTRIBUTING.md)."
+          pr-message: "Thank you for your contribution 🔥 We will look into this as soon as possible 🚀\n\n In the meantime, we recommend every new contributor to take a look at the [Contributor Guide](https://github.com/cluetec/lifeboat/CONTRIBUTING.md)."

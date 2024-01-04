@@ -18,29 +18,44 @@ package filesystem
 
 import (
 	globalConfig "github.com/cluetec/lifeboat/internal/config"
-	"github.com/mitchellh/mapstructure"
 	"log/slog"
+	"os"
 )
 
-const Type = "filesystem"
-
-type metaConfig struct {
-	Filesystem Config
+type Reader struct {
+	file *os.File
 }
 
-type config struct {
-	Path string
-}
-
-func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
-	var c metaConfig
-
-	err := mapstructure.Decode(rc, &c)
-
+func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
+	c, err := newConfig(rc)
 	if err != nil {
-		slog.Error("unable to decode config into filesystem source config", "error", err)
+		slog.Error("error while initializing filesystem source config", "error", err)
 		return nil, err
 	}
 
-	return &c.Filesystem, nil
+	slog.Debug("filesystem source config loaded", "config", rc)
+
+	f, err := os.Open(c.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Reader{file: f}, nil
+}
+
+func (r *Reader) Read(b []byte) (int, error) {
+	slog.Debug("filesystem source read got called")
+	return r.file.Read(b)
+}
+
+func (r *Reader) Close() error {
+	slog.Debug("closing filesystem reader")
+
+	if r.file != nil {
+		if err := r.file.Close(); err != nil {
+			return err
+		}
+		r.file = nil
+	}
+	return nil
 }

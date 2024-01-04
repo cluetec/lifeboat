@@ -17,33 +17,38 @@
 package source
 
 import (
-	"errors"
 	"github.com/cluetec/lifeboat/internal/config"
-	"github.com/cluetec/lifeboat/internal/source/filesystem"
-	"io"
-	"log/slog"
+	"reflect"
+	"testing"
 )
 
-type Source struct {
-	Reader io.ReadCloser
-}
-
-func New(c config.SourceConfig) (*Source, error) {
-	s := Source{}
-	var err error
-
-	switch {
-	case c.Type == filesystem.Type:
-		s.Reader, err = filesystem.NewReader(&c.ResourceConfig)
+func TestNew(t *testing.T) {
+	type args struct {
+		c config.SourceConfig
 	}
-	if err != nil {
-		slog.Error("error while initializing reader interface for source system", "sourceType", c.Type, "error", err)
-		return nil, err
+	tests := []struct {
+		name    string
+		args    args
+		want    *Source
+		wantErr bool
+	}{
+		{
+			name:    "Throw error if type is not known",
+			args:    args{c: config.SourceConfig{Type: "not-known-type"}},
+			want:    nil,
+			wantErr: true,
+		},
 	}
-
-	if s.Reader == nil {
-		return nil, errors.New("source type not known")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := New(tt.args.c)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
-
-	return &s, nil
 }

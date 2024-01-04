@@ -2,7 +2,7 @@
 
 ## Planned features
 
-- [ ] Step: 1
+- [x] Step: 1
   - [x] Init cobra & viper setup
   - [x] Dynamic config loading with viper (`type`)
 - [x] Step: 2
