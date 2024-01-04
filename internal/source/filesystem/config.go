@@ -24,12 +24,16 @@ import (
 
 const Type = "filesystem"
 
+type metaConfig struct {
+	Filesystem Config
+}
+
 type config struct {
 	Path string
 }
 
 func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
-	var c config
+	var c metaConfig
 
 	err := mapstructure.Decode(rc, &c)
 
@@ -38,5 +42,5 @@ func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
 		return nil, err
 	}
 
-	return &c, nil
+	return &c.Filesystem, nil
 }

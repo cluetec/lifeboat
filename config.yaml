@@ -1,9 +1,11 @@
 source:
   type: filesystem
-  path: /tmp/source.txt
+  filesystem:
+    path: /tmp/source.txt
 
 destination:
   type: filesystem
-  path: /tmp/destination.txt
+  filesystem:
+    path: /tmp/destination.txt
 
 logLevel: debug
