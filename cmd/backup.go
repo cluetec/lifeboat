@@ -83,9 +83,10 @@ var backupCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(
+	backupCmd.PersistentFlags().StringVarP(
 		&cfgFilePath,
 		"config",
+		"c",
 		"",
 		"path to config file (default: ./config.yaml)",
 	)
