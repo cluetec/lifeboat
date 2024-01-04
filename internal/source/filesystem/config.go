@@ -23,19 +23,23 @@ import (
 
 const Type = "filesystem"
 
+type MetaConfig struct {
+	Filesystem Config
+}
+
 type Config struct {
 	Path string
 }
 
 func New(c map[string]any) (*Config, error) {
-	var filesystemConfig Config
+	var config MetaConfig
 
-	err := mapstructure.Decode(c, &filesystemConfig)
+	err := mapstructure.Decode(c, &config)
 
 	if err != nil {
 		slog.Error("unable to decode config into filesystem source config", "error", err)
 		return nil, err
 	}
 
-	return &filesystemConfig, nil
+	return &config.Filesystem, nil
 }
