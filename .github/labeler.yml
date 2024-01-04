@@ -16,7 +16,9 @@
 # Documentation: https://github.com/actions/labeler
 
 ci:
-  - .github/**
+  - changed-files:
+    - any-glob-to-any-file: ".github/**"
 
 documentation:
-  - "**/*.md"
+  - changed-files:
+    - any-glob-to-any-file: "**/*.md"

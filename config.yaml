@@ -5,11 +5,19 @@
 loglevel: info
 
 source:
-  type:
-  token:
-  address:
-  path:
+  type: filesystem
+
+  filesystem:
+    path: /tmp/source.txt
+
+  hashicorpvault:
+    token:
+    address:
 
 destination:
-  type:
-  path:
+  type: filesystem
+
+  filesystem:
+    path: /tmp/destination.txt
+
+logLevel: debug
