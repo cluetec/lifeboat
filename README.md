@@ -35,7 +35,7 @@ the compiled binaries within the GitHub Releases. Later container images as also
 
 ## ⚙️ Usage
 
-Lifeboat is a CLI tool which makes it possible to use it in a various kind of environments like on a local machine, in a
+Lifeboat is a CLI tool which makes it possible to use it in various kind of environments like on a local machine, in a
 Unix cronjob, in Kubernetes, in a VM, wherever the user wants. As the tool needs a quite complex configuration it's
 possible to provide a config file. In addition, it's also possible to provide all configuration via environment
 variables.
@@ -102,7 +102,7 @@ source:
 
 | Yaml Config | Default | Required | Description                                                                                                  |
 |-------------|---------|----------|--------------------------------------------------------------------------------------------------------------|
-| `path`      |         | 👍       | Defines the path in the local filesystem (relative or absolute) to a file or folder that should be backuped. |
+| `path`      |         | 👍       | Defines the path in the local filesystem (relative or absolute) to a file or folder that should be backed up. |
 
 #### Destination storage configuration
 
