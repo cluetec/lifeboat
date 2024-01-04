@@ -25,7 +25,7 @@ updates:
     schedule:
       interval: weekly
     reviewers:
-      - florianrusch-cluetec
+      - florianrusch
       - a-mesin
     labels:
       - dependencies
@@ -36,7 +36,7 @@ updates:
     schedule:
       interval: weekly
     reviewers:
-      - florianrusch-cluetec
+      - florianrusch
       - a-mesin
     labels:
       - dependencies
@@ -46,7 +46,7 @@ updates:
     schedule:
       interval: weekly
     reviewers:
-      - florianrusch-cluetec
+      - florianrusch
       - a-mesin
     labels:
       - dependencies
