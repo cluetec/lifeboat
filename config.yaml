@@ -7,9 +7,11 @@ loglevel: info
 source:
   type: filesystem
 
+  # Filesystem config
   filesystem:
     path: /tmp/source.txt
 
+  # HashiCorp Vault config
   hashicorpvault:
     token:
     authMethod: kubernetes
@@ -18,5 +20,6 @@ source:
 destination:
   type: filesystem
 
+  # Filesystem config
   filesystem:
     path: /tmp/destination.txt
