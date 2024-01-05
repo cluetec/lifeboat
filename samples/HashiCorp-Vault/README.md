@@ -1,6 +1,6 @@
 # Sample: Backup HashiCorp Vault
 
-In this example we will show you how to back up an HashiCorp Vault instance.
+In this example we will show you how to backup an HashiCorp Vault instance.
 
 ## Requirements
 
