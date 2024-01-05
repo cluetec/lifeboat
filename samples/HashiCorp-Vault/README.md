@@ -1,6 +1,6 @@
 # Sample: Backup HashiCorp Vault
 
-In this example we will show you how to back up an HashiCorp Vault instance.
+In this example we will show you how to backup an HashiCorp Vault instance.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ underlying storage engine.
 ## Policy
 
 In this sample we are using for simplicity reasons the "root token" to authorize us. In a real world scenario you
-would use a separate took or any other
+would use a separate token or any other
 [authentication method supported by vault](https://developer.hashicorp.com/vault/docs/auth).
 
 **What's important here**: Normally your identity shouldn't have root permissions! The only permission you need for
@@ -35,8 +35,8 @@ $ docker-compose up -d
 ```
 
 As we can't simply use the dev mode of Vault, we need to initialize and unseal it first. For this purpose the
-`docker-compose.yaml` contains next to the vault container an additional one which is called `vault-init`. This
-container contains the bash script `./init-and-fill-vault.sh` which will do all the necessary steps.
+`docker-compose.yaml` contains an additional container which is called `vault-init`. This container contains the bash
+script `./init-and-fill-vault.sh` which will do all the necessary steps.
 
 On default, we are storing 1000 secrets with a length of 2000 random chars into vault. As this takes some seconds, you
 can verify with this command, if the container has successfully executed the script or not. As a hint, it could take

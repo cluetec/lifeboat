@@ -25,7 +25,7 @@ import (
 
 const snapshotPath = "/sys/storage/raft/snapshot"
 
-// Reader implements the `io.ReaderClose` interface for read the backup from HashiCorp Vault.
+// Reader implements the `io.ReaderClose` interface in order to read the backup from HashiCorp Vault.
 type Reader struct {
 	client *vault.Client
 	reader io.Reader

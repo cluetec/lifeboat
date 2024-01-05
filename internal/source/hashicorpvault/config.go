@@ -26,6 +26,10 @@ import (
 
 const Type = "hashicorpvault"
 
+type metaConfig struct {
+	hashicorpvault config
+}
+
 type config struct {
 	Address string `validate:"http_url,required"`
 	Token   string `validate:"required"`
@@ -33,10 +37,10 @@ type config struct {
 
 var validate *validator.Validate
 
-// newConfig provides the specific `config` struct. Therefor it takes the generic `globalConfig.ResourceConfig` and
+// newConfig provides the specific `config` struct. It takes the generic `globalConfig.ResourceConfig` and
 // decodes it into the `config` struct and validates the values.
 func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
-	var c config
+	var c metaConfig
 
 	err := mapstructure.Decode(rc, &c)
 	if err != nil {
@@ -49,7 +53,7 @@ func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
 		return nil, err
 	}
 
-	return &c, nil
+	return &c.hashicorpvault, nil
 }
 
 // LogValue customizes how the `config` struct will be printed in the logs.
@@ -57,10 +61,6 @@ func (c *config) LogValue() slog.Value {
 	return slog.GroupValue(slog.String("address", c.Address), slog.String("token", "***"))
 }
 
-// GetHashiCorpVaultConfig was implement in regard to the
-// `vault.DefaultConfig()` method. While the implementation the
-// `config.ReadEnvironment` was left of, to avoid the usage of additional
-// environment variables like `VAULT_ADDRESS`.
 func (c *config) GetHashiCorpVaultConfig() *vault.Config {
 	config := vault.Config{
 		Address: c.Address,

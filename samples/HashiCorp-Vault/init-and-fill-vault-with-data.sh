@@ -79,7 +79,7 @@ done << EOF
 $initOutput
 EOF
 
-# Write unseal keys und token into separate files
+# Write unseal keys and token into separate files
 echo "${unsealKeys}" > vault-unseal-keys.txt
 echo "${rootToken}" > vault-token.txt
 
