@@ -29,11 +29,11 @@ type Reader struct {
 func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 	c, err := newConfig(rc)
 	if err != nil {
-		slog.Error("error while initializing filesystem source config", "error", err)
+		slog.Error("error while initializing source config", "sourceType", Type, "error", err)
 		return nil, err
 	}
 
-	slog.Debug("filesystem source config loaded", "config", rc)
+	slog.Debug("source config loaded", "sourceType", Type, "config", c)
 
 	f, err := os.Open(c.Path)
 	if err != nil {
@@ -44,12 +44,12 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 }
 
 func (r *Reader) Read(b []byte) (int, error) {
-	slog.Debug("filesystem source read got called")
+	slog.Debug("read got called", "sourceType", Type)
 	return r.file.Read(b)
 }
 
 func (r *Reader) Close() error {
-	slog.Debug("closing filesystem reader")
+	slog.Debug("closing reader", "sourceType", Type)
 
 	if r.file != nil {
 		if err := r.file.Close(); err != nil {

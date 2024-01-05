@@ -35,11 +35,11 @@ type Reader struct {
 func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 	c, err := newConfig(rc)
 	if err != nil {
-		slog.Error("error while initializing source config", "sourceType", "hashicorpvault", "error", err)
+		slog.Error("error while initializing source config", "sourceType", Type, "error", err)
 		return nil, err
 	}
 
-	slog.Debug("source config loaded", "sourceType", Type, "config", rc)
+	slog.Debug("source config loaded", "sourceType", Type, "config", c)
 
 	client, err := vault.NewClient(c.GetHashiCorpVaultConfig())
 	if err != nil {
@@ -51,7 +51,7 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 }
 
 func (r *Reader) Read(b []byte) (int, error) {
-	slog.Debug("hashicorp vault source read got called")
+	slog.Debug("read got called", "sourceType", Type)
 
 	if r.reader == nil {
 		resp, err := r.client.Logical().ReadRaw(snapshotPath)
@@ -67,7 +67,7 @@ func (r *Reader) Read(b []byte) (int, error) {
 }
 
 func (r *Reader) Close() error {
-	slog.Debug("closing HashiCorp Vault reader")
+	slog.Debug("closing reader", "sourceType", Type)
 	if closer, ok := r.reader.(io.Closer); ok {
 		return closer.Close()
 	}
