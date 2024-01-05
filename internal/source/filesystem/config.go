@@ -25,7 +25,7 @@ import (
 const Type = "filesystem"
 
 type metaConfig struct {
-	Filesystem Config
+	Filesystem config
 }
 
 type config struct {
