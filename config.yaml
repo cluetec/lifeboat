@@ -19,5 +19,3 @@ destination:
 
   filesystem:
     path: /tmp/destination.txt
-
-logLevel: debug
