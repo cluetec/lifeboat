@@ -13,3 +13,6 @@ trim_trailing_whitespace = true
 
 [{*.go,Makefile,go.mod,go.sum}]
 indent_style = tab
+
+[*.sh]
+indent_size = 4

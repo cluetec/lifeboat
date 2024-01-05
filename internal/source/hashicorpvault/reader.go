@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package filesystem
+package hashicorpvault
 
 import (
 	globalConfig "github.com/cluetec/lifeboat/internal/config"
+	vault "github.com/hashicorp/vault/api"
+	"io"
 	"log/slog"
-	"os"
 )
 
+const snapshotPath = "/sys/storage/raft/snapshot"
+
+// Reader implements the `io.ReaderClose` interface in order to read the backup from HashiCorp Vault.
 type Reader struct {
-	file *os.File
+	client *vault.Client
+	reader io.Reader
 }
 
+// NewReader initializes a new `Reader` struct which is implementing the `io.ReaderClose` interface.
 func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 	c, err := newConfig(rc)
 	if err != nil {
@@ -35,27 +41,35 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 
 	slog.Debug("source config loaded", "sourceType", Type, "config", c)
 
-	f, err := os.Open(c.Path)
+	client, err := vault.NewClient(c.GetHashiCorpVaultConfig())
 	if err != nil {
 		return nil, err
 	}
 
-	return &Reader{file: f}, nil
+	client.SetToken(c.Token)
+	return &Reader{client: client}, nil
 }
 
 func (r *Reader) Read(b []byte) (int, error) {
 	slog.Debug("read got called", "sourceType", Type)
-	return r.file.Read(b)
+
+	if r.reader == nil {
+		resp, err := r.client.Logical().ReadRaw(snapshotPath)
+		if err != nil {
+			slog.Error("failed to called backup endpoint", "error", err)
+			return 0, err
+		}
+
+		r.reader = resp.Body
+	}
+
+	return r.reader.Read(b)
 }
 
 func (r *Reader) Close() error {
 	slog.Debug("closing reader", "sourceType", Type)
-
-	if r.file != nil {
-		if err := r.file.Close(); err != nil {
-			return err
-		}
-		r.file = nil
+	if closer, ok := r.reader.(io.Closer); ok {
+		return closer.Close()
 	}
 	return nil
 }

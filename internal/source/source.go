@@ -20,6 +20,7 @@ import (
 	"errors"
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/source/filesystem"
+	"github.com/cluetec/lifeboat/internal/source/hashicorpvault"
 	"io"
 	"log/slog"
 )
@@ -32,9 +33,11 @@ func New(c config.SourceConfig) (*Source, error) {
 	s := Source{}
 	var err error
 
-	switch {
-	case c.Type == filesystem.Type:
+	switch c.Type {
+	case filesystem.Type:
 		s.Reader, err = filesystem.NewReader(&c.ResourceConfig)
+	case hashicorpvault.Type:
+		s.Reader, err = hashicorpvault.NewReader(&c.ResourceConfig)
 	}
 	if err != nil {
 		slog.Error("error while initializing reader interface for source system", "sourceType", c.Type, "error", err)
