@@ -1,6 +1,8 @@
 # Lifeboat
 
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cluetec/lifeboat) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/cluetec/lifeboat) [![Go Report Card](https://goreportcard.com/badge/github.com/cluetec/lifeboat)](https://goreportcard.com/report/github.com/cluetec/lifeboat)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cluetec/lifeboat)](https://github.com/cluetec/lifeboat/releases)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/cluetec/lifeboat)](go.sum)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cluetec/lifeboat)](https://goreportcard.com/report/github.com/cluetec/lifeboat)
 
 Lifeboat is a backup tool provided by [cluetec GmbH](https://cluetec.de). Lifeboat enables the user to create backups
 for a range of different source systems (e.g. PostgreSQL, MongoDB, HashiCorp Vault) and storing the backup also in
