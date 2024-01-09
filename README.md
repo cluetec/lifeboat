@@ -149,6 +149,6 @@ To have some contribution guidance, please have a look at [CONTRIBUTING.md](CONT
 
 Made with [contrib.rocks](https://contrib.rocks).
 
-## License
+## ⚖️ License
 
 The project is licensed under the ["Apache-2.0"](./LICENSE) license.
