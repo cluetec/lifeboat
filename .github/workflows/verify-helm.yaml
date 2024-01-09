@@ -31,9 +31,10 @@ jobs:
         with:
           allowed-endpoints: >
             github.com:443
+            *.docker.io:443
           disable-sudo: true
           disable-telemetry: true
-          egress-policy: block
+          egress-policy: audit
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
