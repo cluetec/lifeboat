@@ -15,8 +15,11 @@
 name: "Verify helm"
 
 on:
-  workflow_call:
-  # Allows you to run this workflow manually from the Actions tab
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "chart/**"
   workflow_dispatch:
 
 jobs:
