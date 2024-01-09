@@ -22,6 +22,9 @@ on:
       - "chart/**"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   verify-helm-docs:
     runs-on: ubuntu-latest
@@ -49,3 +52,36 @@ jobs:
             git diff
             exit 1
           fi
+
+  verify-chart-snapshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          allowed-endpoints: >
+            auth.docker.io:443
+            github.com:443
+            production.cloudflare.docker.com:443
+            registry-1.docker.io:443
+          disable-sudo: true
+          disable-telemetry: true
+          egress-policy: block
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # Uses the default values.yaml
+      - uses: jlandowner/helm-chartsnap-action@9a4375ea5aa394593aadeef511ff37456df4e3be # v1
+        with:
+          chart:  chart
+          update_snapshot: false
+          additional_args: --namespace default
+          disable_create_pull_request: true
+
+      # Uses the special case test_*.yaml values files from test folder
+      - uses: jlandowner/helm-chartsnap-action@9a4375ea5aa394593aadeef511ff37456df4e3be # v1
+        with:
+          chart:  chart
+          values: chart/test/
+          update_snapshot: false
+          additional_args: --namespace default
+          disable_create_pull_request: true
