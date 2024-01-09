@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - run: |
-          docker run --rm --volume "${{ github.workspace }}/charts:/helm-docs" -u $(id -u) jnorwood/helm-docs:latest
+          docker run --rm --volume "${{ github.workspace }}/chart:/helm-docs" -u $(id -u) jnorwood/helm-docs:latest
 
           if $(git diff --quiet --exit-code); then
             echo "Helm chart docs up to date"
@@ -71,7 +71,7 @@ jobs:
       # Uses the default values.yaml
       - uses: jlandowner/helm-chartsnap-action@9a4375ea5aa394593aadeef511ff37456df4e3be # v1
         with:
-          chart:  chart
+          chart: ${{ github.workspace }}/chart
           update_snapshot: false
           additional_args: --namespace default
           disable_create_pull_request: true
@@ -79,8 +79,8 @@ jobs:
       # Uses the special case test_*.yaml values files from test folder
       - uses: jlandowner/helm-chartsnap-action@9a4375ea5aa394593aadeef511ff37456df4e3be # v1
         with:
-          chart:  chart
-          values: chart/test/
+          chart: ${{ github.workspace }}/chart
+          values: ${{ github.workspace }}/chart/test/
           update_snapshot: false
           additional_args: --namespace default
           disable_create_pull_request: true
