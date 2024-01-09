@@ -1,0 +1,142 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "lifeboat.fullname" $ }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "lifeboat.labels" $ | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  concurrencyPolicy: {{ .Values.concurrencyPolicy }}
+  failedJobsHistoryLimit: {{ .Values.failedJobsHistoryLimit }}
+  schedule: {{ .Values.schedule | quote }}
+  {{- if .Values.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ .Values.startingDeadlineSeconds }}
+  {{- end }}
+  successfulJobsHistoryLimit: {{ .Values.successfulJobsHistoryLimit }}
+  suspend: {{ .Values.suspend }}
+  {{- if .Values.timeZone }}
+  timeZone: {{ .Values.timeZone }}
+  {{- end }}
+
+  jobTemplate:
+    metadata:
+      {{- with .Values.jobAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "lifeboat.labels" $ | nindent 8 }}
+    spec:
+      template:
+        metadata:
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            {{- include "lifeboat.labels" $ | nindent 12 }}
+        spec:
+          serviceAccountName: {{ include "lifeboat.serviceAccountName" $ }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.podSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: {{ .Values.restartPolicy }}
+
+          containers:
+            - name: {{ .Chart.Name }}
+
+              {{- with .Values.securityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+              env:
+                {{- range $key, $value := .Values.envValueFrom }}
+                - name: {{ $key | quote }}
+                  valueFrom:
+                    {{- tpl (toYaml $value) $ | nindent 20 }}
+                {{- end }}
+                {{- range $key, $value := .Values.env }}
+                - name: {{ $key | quote }}
+                  value: {{ $value }}
+                {{- end }}
+
+              envFrom:
+                {{- range $value := .Values.envSecretNames }}
+                - secretRef:
+                    name: {{ $value | quote }}
+                {{- end }}
+                {{- range $value := .Values.envConfigMapNames }}
+                - configMapRef:
+                    name: {{ $value | quote }}
+                {{- end }}
+
+              {{- with .Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+
+              volumeMounts:
+                {{- if .Values.configuration }}
+                - name: config
+                  mountPath: /app
+                  readOnly: true
+                {{- end }}
+                {{- if .Values.storage.enabled }}
+                - name: backup
+                  mountPath: {{ .Values.storage.mountPath}}
+                {{- end }}
+
+                {{- with .Values.volumeMounts }}
+                  {{- toYaml . | nindent 16 }}
+                {{- end }}
+
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          volumes:
+            {{- if .Values.configuration }}
+            - name: config
+              configMap:
+                name: {{ include "lifeboat.fullname" $ }}
+                items:
+                  - key: "config.yaml"
+                    path: "config.yaml"
+            {{- end }}
+            {{- if .Values.storage.enabled }}
+            {{- if .Values.storage.existingClaim }}
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ .Values.storage.existingClaim }}
+            {{- else }}
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "lifeboat.fullname" $ }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.volumes }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
