@@ -69,7 +69,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       # Uses the default values.yaml
-      - uses: jlandowner/helm-chartsnap-action@9a4375ea5aa394593aadeef511ff37456df4e3be # v1
+      - uses: jlandowner/helm-chartsnap-action@0561d6d0132753ceb052cf1e7dcb7385dbb303c9 # fix
         with:
           chart: ${{ github.workspace }}/chart
           update_snapshot: false
@@ -77,7 +77,7 @@ jobs:
           disable_create_pull_request: true
 
       # Uses the special case test_*.yaml values files from test folder
-      - uses: jlandowner/helm-chartsnap-action@9a4375ea5aa394593aadeef511ff37456df4e3be # v1
+      - uses: jlandowner/helm-chartsnap-action@0561d6d0132753ceb052cf1e7dcb7385dbb303c9 # fix
         with:
           chart: ${{ github.workspace }}/chart
           values: ${{ github.workspace }}/chart/test/
