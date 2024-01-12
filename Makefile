@@ -19,9 +19,6 @@ MAIN_FILE_PATH ?= ./main.go
 # Path where the binary will be stored
 BINARY_FILE_PATH = out/lb
 
-GOOS ?= darwin
-GOARCH ?= arm64
-
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
@@ -72,5 +69,5 @@ ci: dependencies vet test build ## Run certain recipes for CI pipeline.
 
 .PHONY: build
 build: ## Build binary.
-	GOOS=${GOOS} GOARCH=${GOARCH} go build --ldflags="-s -w" -o ${BINARY_FILE_PATH} ${MAIN_FILE_PATH}
+	go build --ldflags="-s -w" -o ${BINARY_FILE_PATH} ${MAIN_FILE_PATH}
 	chmod u+x ${BINARY_FILE_PATH}
