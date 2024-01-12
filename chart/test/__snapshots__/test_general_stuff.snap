@@ -1,0 +1,94 @@
+[test_general_stuff]
+SnapShot = """
+- object:
+    apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+        annotations:
+            test: 123
+        labels:
+            app.kubernetes.io/instance: chartsnap
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: lifeboat
+            app.kubernetes.io/version: 0.1.0
+            helm.sh/chart: lifeboat-0.1.0
+        name: chartsnap-lifeboat
+        namespace: default
+    spec:
+        concurrencyPolicy: Forbid
+        failedJobsHistoryLimit: 1
+        jobTemplate:
+            metadata:
+                annotations:
+                    test2: 234
+                labels:
+                    app.kubernetes.io/instance: chartsnap
+                    app.kubernetes.io/managed-by: Helm
+                    app.kubernetes.io/name: lifeboat
+                    app.kubernetes.io/version: 0.1.0
+                    helm.sh/chart: lifeboat-0.1.0
+            spec:
+                template:
+                    metadata:
+                        annotations:
+                            test3: 345
+                        labels:
+                            app.kubernetes.io/instance: chartsnap
+                            app.kubernetes.io/managed-by: Helm
+                            app.kubernetes.io/name: lifeboat
+                            app.kubernetes.io/version: 0.1.0
+                            helm.sh/chart: lifeboat-0.1.0
+                    spec:
+                        containers:
+                            - env:
+                                - name: TEST_ENV_3
+                                  valueFrom:
+                                    configMapKeyRef:
+                                        key: my-key
+                                        name: my-cm
+                                - name: TEST_ENV_1
+                                  value: env1
+                                - name: TEST_ENV_2
+                                  value: env2
+                              envFrom:
+                                - secretRef:
+                                    name: my-secret-1
+                                - configMapRef:
+                                    name: my-cm-2
+                              image: cluetec/lifeboat:0.1.0
+                              imagePullPolicy: IfNotPresent
+                              name: lifeboat
+                              securityContext:
+                                capabilities:
+                                    drop:
+                                        - ALL
+                                readOnlyRootFilesystem: true
+                                runAsNonRoot: true
+                                runAsUser: 1000
+                              volumeMounts: null
+                        imagePullSecrets:
+                            - name: my-pull-secret
+                        restartPolicy: Never
+                        securityContext:
+                            fsGroup: 2000
+                            runAsGroup: 3000
+                            runAsUser: 1000
+                        serviceAccountName: chartsnap-lifeboat
+                        volumes: null
+        schedule: 0 3 * * *
+        successfulJobsHistoryLimit: 3
+        suspend: false
+        timeZone: Europe/Berlin
+- object:
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+        labels:
+            app.kubernetes.io/instance: chartsnap
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: lifeboat
+            app.kubernetes.io/version: 0.1.0
+            helm.sh/chart: lifeboat-0.1.0
+        name: chartsnap-lifeboat
+        namespace: default
+"""

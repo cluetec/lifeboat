@@ -1,0 +1,60 @@
+[default]
+SnapShot = """
+- object:
+    apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+        labels:
+            app.kubernetes.io/instance: chartsnap
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: lifeboat
+            app.kubernetes.io/version: 0.1.0
+            helm.sh/chart: lifeboat-0.1.0
+        name: chartsnap-lifeboat
+        namespace: default
+    spec:
+        concurrencyPolicy: Forbid
+        failedJobsHistoryLimit: 1
+        jobTemplate:
+            metadata:
+                labels:
+                    app.kubernetes.io/instance: chartsnap
+                    app.kubernetes.io/managed-by: Helm
+                    app.kubernetes.io/name: lifeboat
+                    app.kubernetes.io/version: 0.1.0
+                    helm.sh/chart: lifeboat-0.1.0
+            spec:
+                template:
+                    metadata:
+                        labels:
+                            app.kubernetes.io/instance: chartsnap
+                            app.kubernetes.io/managed-by: Helm
+                            app.kubernetes.io/name: lifeboat
+                            app.kubernetes.io/version: 0.1.0
+                            helm.sh/chart: lifeboat-0.1.0
+                    spec:
+                        containers:
+                            - env: null
+                              envFrom: null
+                              image: cluetec/lifeboat:0.1.0
+                              imagePullPolicy: IfNotPresent
+                              name: lifeboat
+                              securityContext:
+                                capabilities:
+                                    drop:
+                                        - ALL
+                                readOnlyRootFilesystem: true
+                                runAsNonRoot: true
+                                runAsUser: 1000
+                              volumeMounts: null
+                        restartPolicy: Never
+                        securityContext:
+                            fsGroup: 2000
+                            runAsGroup: 3000
+                            runAsUser: 1000
+                        serviceAccountName: default
+                        volumes: null
+        schedule: 0 3 * * *
+        successfulJobsHistoryLimit: 3
+        suspend: false
+"""

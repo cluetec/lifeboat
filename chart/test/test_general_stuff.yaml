@@ -1,0 +1,35 @@
+configuration:
+  test: 012
+
+annotations:
+  test: 123
+
+jobAnnotations:
+  test2: 234
+
+podAnnotations:
+  test3: 345
+
+timeZone: Europe/Berlin
+
+imagePullSecrets:
+  - name: my-pull-secret
+
+env:
+  TEST_ENV_1: env1
+  TEST_ENV_2: env2
+
+envValueFrom:
+  TEST_ENV_3:
+    configMapKeyRef:
+      name: my-cm
+      key: my-key
+
+envSecretNames:
+  - my-secret-1
+
+envConfigMapNames:
+  - my-cm-2
+
+serviceAccount:
+  enabled: true

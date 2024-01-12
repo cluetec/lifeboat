@@ -1,0 +1,86 @@
+# Copyright 2024 cluetec GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Verify helm"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "chart/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          allowed-endpoints: >
+            auth.docker.io:443
+            github.com:443
+            production.cloudflare.docker.com:443
+            registry-1.docker.io:443
+          disable-sudo: true
+          disable-telemetry: true
+          egress-policy: block
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - run: |
+          docker run --rm --volume "${{ github.workspace }}/chart:/helm-docs" -u $(id -u) jnorwood/helm-docs:latest
+
+          if $(git diff --quiet --exit-code); then
+            echo "Helm chart docs up to date"
+          else
+            echo "Helm chart docs not up to date:"
+            git diff
+            exit 1
+          fi
+
+  verify-chart-snapshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          allowed-endpoints: >
+            get.helm.sh:443
+            github.com:443
+            objects.githubusercontent.com:443
+          disable-sudo: true
+          disable-telemetry: true
+          egress-policy: block
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # Uses the default values.yaml
+      - uses: jlandowner/helm-chartsnap-action@0561d6d0132753ceb052cf1e7dcb7385dbb303c9 # fix
+        with:
+          chart: ${{ github.workspace }}/chart
+          update_snapshot: false
+          additional_args: --namespace default
+          disable_create_pull_request: true
+
+      # Uses the special case test_*.yaml values files from test folder
+      - uses: jlandowner/helm-chartsnap-action@0561d6d0132753ceb052cf1e7dcb7385dbb303c9 # fix
+        with:
+          chart: ${{ github.workspace }}/chart
+          values: ${{ github.workspace }}/chart/test/
+          update_snapshot: false
+          additional_args: --namespace default
+          disable_create_pull_request: true

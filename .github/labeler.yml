@@ -22,3 +22,7 @@ ci:
 documentation:
   - changed-files:
     - any-glob-to-any-file: "**/*.md"
+
+helm-chart:
+  - changed-files:
+    - any-glob-to-any-file: "chart/**"
