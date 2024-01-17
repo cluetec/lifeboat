@@ -22,11 +22,16 @@ import (
 	"strings"
 )
 
-func initViper() error {
+func initViper(cfgFilePath string) error {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AddConfigPath(".")
-	viper.SetConfigFile("./config.yaml")
+
+	if cfgFilePath == "" {
+		viper.AddConfigPath(".")
+		viper.SetConfigFile("./config.yaml")
+	} else {
+		viper.SetConfigFile(cfgFilePath)
+	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		slog.Error("error while reading in the configs: %w", err)

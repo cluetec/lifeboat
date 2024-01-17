@@ -1,0 +1,25 @@
+services:
+  vault:
+    image: hashicorp/vault:1.15
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./.data:/vault/data:rw
+      - ./vault.hcl:/vault/vault.hcl:rw
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config=/vault/vault.hcl
+
+  vault-init:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM hashicorp/vault:1.15
+        RUN apk update && \
+            apk add bash
+      no_cache: true
+    volumes:
+      - ./init-and-fill-vault-with-data.sh:/init.sh:ro
+      - ./vault-token.txt:/vault-token.txt:rw
+      - ./vault-unseal-keys.txt:/vault-unseal-keys.txt:rw
+    entrypoint: bash /init.sh

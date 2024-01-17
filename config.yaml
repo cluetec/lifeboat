@@ -1,11 +1,21 @@
+# In order to enable environmental substitution, it is necessary to include all potential configurations in this
+# configuration file. Otherwise, the environment variables will not be automatically added to the ResourceConfig
+# (`mapstructure:",remain"`).
+
+loglevel: info
+
 source:
   type: filesystem
+
   filesystem:
     path: /tmp/source.txt
 
+  hashicorpvault:
+    token:
+    address:
+
 destination:
   type: filesystem
+
   filesystem:
     path: /tmp/destination.txt
-
-logLevel: debug

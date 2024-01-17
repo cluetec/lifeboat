@@ -30,18 +30,18 @@ type Writer struct {
 func NewWriter(rc *globalConfig.ResourceConfig) (*Writer, error) {
 	c, err := newConfig(rc)
 	if err != nil {
-		slog.Error("error while initializing filesystem destination config", "error", err)
+		slog.Error("error while initializing destination config", "destinationType", Type, "error", err)
 		return nil, err
 	}
 
-	slog.Debug("filesystem destination config loaded", "config", c)
+	slog.Debug("destination config loaded", "destinationType", Type, "config", c)
 
 	// Check if destination file already exists
 	_, err = os.Stat(c.Path)
 	if err == nil {
 		return nil, errors.New("destination file already exists")
 	} else if !errors.Is(err, os.ErrNotExist) {
-		slog.Error("error while checking if destination file already exists", "error", err)
+		slog.Error("error while checking if destination file already exists", "destinationType", Type, "error", err)
 		return nil, err
 	}
 
@@ -56,11 +56,12 @@ func NewWriter(rc *globalConfig.ResourceConfig) (*Writer, error) {
 
 func (w *Writer) Write(b []byte) (int, error) {
 	slog.Debug("filesystem destination write got called")
+	slog.Debug("write got called", "destinationType", Type)
 	return w.file.Write(b)
 }
 
 func (w *Writer) Close() error {
-	slog.Debug("closing filesystem writer")
+	slog.Debug("closing writer", "destinationType", Type)
 
 	if w.file != nil {
 		if err := w.file.Close(); err != nil {

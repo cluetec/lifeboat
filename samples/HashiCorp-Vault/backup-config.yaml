@@ -1,0 +1,9 @@
+source:
+  type: hashicorpvault
+  # the token will be provided via env variable
+  token:
+  address: http://127.0.0.1:8200
+
+destination:
+  type: filesystem
+  path: ./backup-destination/vault-backup.snap
