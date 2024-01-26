@@ -98,71 +98,8 @@ func (r *Reader) prepareDir(srcPath string) error {
 	gw := gzip.NewWriter(mw)
 	tw := tar.NewWriter(gw)
 
-	err := filepath.WalkDir(srcPath, func(path string, entry fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// exclude root dir from resulting archive
-		if path == srcPath {
-			return nil
-		}
-
-		fileInfo, err := entry.Info()
-		if err != nil {
-			return err
-		}
-
-		// resolve symlinks
-		if entry.Type()&fs.ModeSymlink == fs.ModeSymlink {
-			resolvedFileInfo, err := resolveSymLink(srcPath, path)
-			if err != nil {
-				return err
-			}
-
-			fileInfo = *resolvedFileInfo
-		}
-
-		slog.Debug("walking...", "path", path, "fileInfo", fileInfo)
-
-		header, err := tar.FileInfoHeader(fileInfo, fileInfo.Name())
-		if err != nil {
-			return err
-		}
-
-		// preserve folder structure inside tar archive, f.e. for files in nested directories
-		header.Name, err = filepath.Rel(srcPath, path)
-
-		if entry.Type()&fs.ModeSymlink == fs.ModeSymlink {
-			// use the resolved file name instead of the link name
-			header.Name, err = filepath.Rel(srcPath, filepath.Join(filepath.Dir(path), fileInfo.Name()))
-		}
-		if err != nil {
-			return err
-		}
-
-		slog.Debug("writing header", "header", header)
-		if err := tw.WriteHeader(header); err != nil {
-			return err
-		}
-
-		// write the actual file contents into the archive
-		if !entry.IsDir() {
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			slog.Info("writing file", "originalPath", path, "resultingFile", header.Name)
-			if _, err := io.Copy(tw, file); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-	if err != nil {
+	// TODO: closure over srcPath
+	if err := filepath.WalkDir(srcPath, writeFileIntoArchive(tw, srcPath)); err != nil {
 		return err
 	}
 
@@ -179,21 +116,93 @@ func (r *Reader) prepareDir(srcPath string) error {
 	return nil
 }
 
+func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entry fs.DirEntry, err error) error {
+	return func(path string, entry fs.DirEntry, err error) error {
+		slog.Info("====== NEXT FILE ======")
+		slog.Info("paths", "srcPath", srcPath, "path", path)
+		if err != nil {
+			return err
+		}
+
+		// exclude root dir from resulting archive
+		if path == srcPath {
+			return nil
+		}
+
+		fileInfo, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		slog.Debug("walking...", "path", path, "fileInfo", fileInfo.Name())
+
+		// check if entry is a asymlink
+		if entry.Type()&fs.ModeSymlink == fs.ModeSymlink {
+			resolvedFileInfo, resolvedPath, err := resolveSymLink(srcPath, path)
+			if err != nil {
+				return err
+			}
+
+			fileInfo = *resolvedFileInfo
+
+			// check if symlink is pointing to a dir
+			if fileInfo.IsDir() {
+				slog.Debug("symlink points to a directory - iterate over files", "path", resolvedPath)
+
+				err := filepath.WalkDir(resolvedPath, writeFileIntoArchive(tw, resolvedPath))
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		header, err := tar.FileInfoHeader(fileInfo, fileInfo.Name())
+		if err != nil {
+			return err
+		}
+
+		// preserve folder structure inside tar archive, f.e. for files in nested directories
+		header.Name, err = filepath.Rel(srcPath, filepath.Join(filepath.Dir(path), fileInfo.Name()))
+		if err != nil {
+			return err
+		}
+
+		slog.Debug("writing header", "header", header.Name)
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+
+		// write the actual file contents into the archive
+		if !fileInfo.IsDir() {
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			slog.Info("writing file", "originalPath", path, "resultingFile", header.Name)
+			if _, err := io.Copy(tw, file); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
 // resolveSymLink returns the fileInfo of the file which a soft symlinks point to
-func resolveSymLink(srcPath, linkPath string) (*fs.FileInfo, error) {
+func resolveSymLink(srcPath, linkPath string) (*fs.FileInfo, string, error) {
 	resolvedPath, err := os.Readlink(linkPath)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-
-	slog.Debug("resolved symlink", "resolvedPath", resolvedPath)
 
 	if !filepath.IsAbs(resolvedPath) {
 		resolvedPath = fmt.Sprintf("%s/%s", srcPath, resolvedPath)
 	}
 
 	fileInfo, err := os.Stat(resolvedPath)
-	return &fileInfo, err
+	slog.Debug("resolved symlink", "resolvedPath", resolvedPath, "resolvedFileInfo", fileInfo.Name())
+	return &fileInfo, resolvedPath, err
 }
 
 // prepareFile opens the source file with the given path and sets it at the reader
