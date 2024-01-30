@@ -1,0 +1,36 @@
+repositories:
+  - name: hashicorp
+    url: https://helm.releases.hashicorp.com
+
+helmDefaults:
+  # restores previous state in case of failed release (default false)
+  atomic: false
+  # when true, cleans up any new resources created during a failed release (default false)
+  cleanupOnFail: false
+  wait: true
+  waitForJobs: true
+  # As long as the secrets have to be previously deployed manually the namespace should already exist
+  createNamespace: false
+  timeout: 600
+  # limit the maximum number of revisions saved per release. Use 0 for no limit. (default 10)
+  historyMax: 3
+
+releases:
+  - name: vault
+    chart: hashicorp/vault
+    version: 0.27.0
+    values:
+      - values/vault.yaml
+    missingFileHandler: Error
+
+  # - name: lifeboat
+  #   chart: ../../chart
+  #   version: 0.1.0
+  #   values:
+  #     - values/lifeboat.yaml
+  #   missingFileHandler: Error
+
+  # # This is needed in regard to this helm bug https://github.com/helm/helm/issues/10733
+  # - name: init-pod
+  #   chart: ./k8s
+  #   missingFileHandler: Error

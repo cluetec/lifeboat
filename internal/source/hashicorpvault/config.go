@@ -17,11 +17,12 @@
 package hashicorpvault
 
 import (
+	"log/slog"
+
 	globalConfig "github.com/cluetec/lifeboat/internal/config"
 	"github.com/go-playground/validator/v10"
 	vault "github.com/hashicorp/vault/api"
 	"github.com/mitchellh/mapstructure"
-	"log/slog"
 )
 
 const Type = "hashicorpvault"
@@ -31,8 +32,9 @@ type metaConfig struct {
 }
 
 type config struct {
-	Address string `validate:"http_url,required"`
-	Token   string `validate:"required"`
+	Address    string `validate:"http_url,required"`
+	Token      string
+	AuthMethod string `validate:"oneof=token kubernetes"`
 }
 
 var validate *validator.Validate

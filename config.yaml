@@ -7,15 +7,19 @@ loglevel: info
 source:
   type: filesystem
 
+  # Filesystem config
   filesystem:
     path: /tmp/source.txt
 
+  # HashiCorp Vault config
   hashicorpvault:
     token:
-    address:
+    authMethod: kubernetes
+    address: https://localhost:8200
 
 destination:
   type: filesystem
 
+  # Filesystem config
   filesystem:
     path: /tmp/destination.txt

@@ -17,10 +17,14 @@
 package hashicorpvault
 
 import (
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
-	vault "github.com/hashicorp/vault/api"
+	"context"
+	"fmt"
 	"io"
 	"log/slog"
+
+	globalConfig "github.com/cluetec/lifeboat/internal/config"
+	vault "github.com/hashicorp/vault/api"
+	auth "github.com/hashicorp/vault/api/auth/kubernetes"
 )
 
 const snapshotPath = "/sys/storage/raft/snapshot"
@@ -46,7 +50,24 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 		return nil, err
 	}
 
-	client.SetToken(c.Token)
+	switch c.AuthMethod {
+	case "token":
+		client.SetToken(c.Token)
+	case "kubernetes":
+		k8sAuth, err := auth.NewKubernetesAuth("k8s-access")
+		if err != nil {
+			return nil, err
+		}
+
+		authInfo, err := client.Auth().Login(context.TODO(), k8sAuth)
+		if err != nil {
+			return nil, err
+		}
+		if authInfo == nil {
+			return nil, fmt.Errorf("no auth info was returned after login")
+		}
+	}
+
 	return &Reader{client: client}, nil
 }
 

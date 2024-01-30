@@ -19,6 +19,9 @@ MAIN_FILE_PATH ?= ./main.go
 # Path where the binary will be stored
 BINARY_FILE_PATH = out/lb
 
+HELM_CHART_PATH ?= ./chart
+HELM_CHART_TEST_PATH ?= ./chart/test
+
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
@@ -61,6 +64,11 @@ vet: ## Run go vet against code.
 .PHONY: test
 test: ## Run tests.
 	go test ./... -coverprofile cover.out
+
+.PHONY: test-helm
+test-helm: ## Run tests for helm chart
+	helm chartsnap -c "${HELM_CHART_PATH}" --namespace default
+	helm chartsnap -c "${HELM_CHART_PATH}" -f "${HELM_CHART_TEST_PATH}" --namespace default
 
 ##@ Build
 
