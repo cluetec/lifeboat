@@ -88,7 +88,7 @@ func (r *Reader) Close() error {
 // prepareDir reads in the source directory for the backup as a gzipped tar archive and sets
 // the contents as a bytes.Buffer to the Reader so it can be written during the backup.
 //
-// Symlinks found in the directory are resolved so the file the link points to will be put into the resulting backup archive.
+// Symlinks found in the source directory are resolved so the file the link points to will be put into the resulting backup archive.
 func (r *Reader) prepareDir(srcPath string) error {
 	slog.Debug("preparing filesystem directory backup")
 	var buf bytes.Buffer
@@ -99,7 +99,7 @@ func (r *Reader) prepareDir(srcPath string) error {
 	tw := tar.NewWriter(gw)
 
 	// TODO: closure over srcPath
-	if err := filepath.WalkDir(srcPath, writeFileIntoArchive(tw, srcPath)); err != nil {
+	if err := filepath.WalkDir(srcPath, writeFileIntoArchive(tw, srcPath, "")); err != nil {
 		return err
 	}
 
@@ -116,10 +116,14 @@ func (r *Reader) prepareDir(srcPath string) error {
 	return nil
 }
 
-func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entry fs.DirEntry, err error) error {
+// writeFileIntoArchive returns the function which reads the current walked file and writes it into
+// the given tar writer.
+// When parentDir is set the current file will be placed in the given directory inside the resulting archive. Mainly used for symlinks on
+// directories so their contents can be resolved into the correct location.
+func writeFileIntoArchive(tw *tar.Writer, srcPath string, parentDir string) func(path string, entry fs.DirEntry, err error) error {
 	return func(path string, entry fs.DirEntry, err error) error {
 		slog.Info("====== NEXT FILE ======")
-		slog.Info("paths", "srcPath", srcPath, "path", path)
+		slog.Debug("paths", "srcPath", srcPath, "path", path)
 		if err != nil {
 			return err
 		}
@@ -133,9 +137,9 @@ func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entr
 		if err != nil {
 			return err
 		}
-		slog.Debug("walking...", "path", path, "fileInfo", fileInfo.Name())
+		slog.Debug("walking...", "fileInfo", fileInfo.Name())
 
-		// check if entry is a asymlink
+		// check if entry is a symlink
 		if entry.Type()&fs.ModeSymlink == fs.ModeSymlink {
 			resolvedFileInfo, resolvedPath, err := resolveSymLink(srcPath, path)
 			if err != nil {
@@ -146,10 +150,8 @@ func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entr
 
 			// check if symlink is pointing to a dir
 			if fileInfo.IsDir() {
-				slog.Debug("symlink points to a directory - iterate over files", "path", resolvedPath)
-
-				err := filepath.WalkDir(resolvedPath, writeFileIntoArchive(tw, resolvedPath))
-				if err != nil {
+				slog.Debug("symlink points to a directory - iterate over files", "resolvedPath", resolvedPath)
+				if err := filepath.WalkDir(resolvedPath, writeFileIntoArchive(tw, resolvedPath, fileInfo.Name())); err != nil {
 					return err
 				}
 			}
@@ -161,7 +163,7 @@ func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entr
 		}
 
 		// preserve folder structure inside tar archive, f.e. for files in nested directories
-		header.Name, err = filepath.Rel(srcPath, filepath.Join(filepath.Dir(path), fileInfo.Name()))
+		header.Name, err = filepath.Rel(srcPath, filepath.Join(filepath.Dir(path), parentDir, fileInfo.Name()))
 		if err != nil {
 			return err
 		}
@@ -171,7 +173,7 @@ func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entr
 			return err
 		}
 
-		// write the actual file contents into the archive
+		// write the file contents into the archive
 		if !fileInfo.IsDir() {
 			file, err := os.Open(path)
 			if err != nil {
@@ -189,7 +191,7 @@ func writeFileIntoArchive(tw *tar.Writer, srcPath string) func(path string, entr
 	}
 }
 
-// resolveSymLink returns the fileInfo of the file which a soft symlinks point to
+// resolveSymLink returns the fileInfo and the resolved path of the file which a soft symlinks point to
 func resolveSymLink(srcPath, linkPath string) (*fs.FileInfo, string, error) {
 	resolvedPath, err := os.Readlink(linkPath)
 	if err != nil {
