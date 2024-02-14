@@ -18,6 +18,7 @@ package filesystem
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"fmt"
@@ -31,8 +32,7 @@ import (
 )
 
 type Reader struct {
-	file        *os.File
-	archivedDir *bytes.Buffer
+	buffer *bytes.Buffer
 }
 
 func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
@@ -49,7 +49,9 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 		return nil, err
 	}
 
-	r := &Reader{}
+	r := &Reader{
+		buffer: bytes.NewBuffer(make([]byte, 0)),
+	}
 
 	if fileInfo.IsDir() {
 		err = r.prepareDir(c.Path)
@@ -65,23 +67,11 @@ func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
 
 func (r *Reader) Read(b []byte) (int, error) {
 	slog.Debug("filesystem source read got called")
-
-	if r.file != nil {
-		return r.file.Read(b)
-	} else {
-		return r.archivedDir.Read(b)
-	}
+	return r.buffer.Read(b)
 }
 
 func (r *Reader) Close() error {
 	slog.Debug("closing filesystem reader")
-
-	if r.file != nil {
-		if err := r.file.Close(); err != nil {
-			return err
-		}
-		r.file = nil
-	}
 	return nil
 }
 
@@ -91,14 +81,11 @@ func (r *Reader) Close() error {
 // Symlinks found in the source directory are resolved so the file the link points to will be put into the resulting backup archive.
 func (r *Reader) prepareDir(srcPath string) error {
 	slog.Debug("preparing filesystem directory backup")
-	var buf bytes.Buffer
-
-	mw := io.MultiWriter(&buf)
+	mw := io.MultiWriter(r.buffer)
 
 	gw := gzip.NewWriter(mw)
 	tw := tar.NewWriter(gw)
 
-	// TODO: closure over srcPath
 	if err := filepath.WalkDir(srcPath, writeFileIntoArchive(tw, srcPath, "")); err != nil {
 		return err
 	}
@@ -110,8 +97,6 @@ func (r *Reader) prepareDir(srcPath string) error {
 	if err := gw.Close(); err != nil {
 		return err
 	}
-
-	r.archivedDir = &buf
 
 	return nil
 }
@@ -207,16 +192,31 @@ func resolveSymLink(srcPath, linkPath string) (*fs.FileInfo, string, error) {
 	return &fileInfo, resolvedPath, err
 }
 
-// prepareFile opens the source file with the given path and sets it at the reader
-// in preparation for the backup
-func (r *Reader) prepareFile(srcPath string) error {
+// prepareFile opens the source file with the given path, reads its contents chunkwise and writes it
+// into the buffer of the reader
+func (r *Reader) prepareFile(filePath string) error {
 	slog.Debug("preparing filesystem file backup")
-	f, err := os.Open(srcPath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	r.file = f
+	var count int
+	reader := bufio.NewReader(file)
+	r.buffer = bytes.NewBuffer(make([]byte, 0))
+	part := make([]byte, 1024)
+
+	for {
+		if count, err = reader.Read(part); err != nil {
+			break
+		}
+		r.buffer.Write(part[:count])
+	}
+	if err != io.EOF {
+		slog.Error("error reading file", "filePath", filePath, "error", err)
+		return err
+	}
 
 	return nil
 }
