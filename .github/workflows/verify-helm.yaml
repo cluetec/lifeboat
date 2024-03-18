@@ -40,7 +40,7 @@ jobs:
           disable-sudo: true
           disable-telemetry: true
           egress-policy: block
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - run: |
           docker run --rm --volume "${{ github.workspace }}/chart:/helm-docs" -u $(id -u) jnorwood/helm-docs:latest
@@ -66,7 +66,7 @@ jobs:
           disable-sudo: true
           disable-telemetry: true
           egress-policy: block
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       # Uses the default values.yaml
       - uses: jlandowner/helm-chartsnap-action@0561d6d0132753ceb052cf1e7dcb7385dbb303c9 # fix
