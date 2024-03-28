@@ -64,10 +64,20 @@ func (c *Config) DebugEnabled() bool {
 }
 
 func New(cfgFilePath string) (*Config, error) {
-	if err := initViper(cfgFilePath); err != nil {
-		slog.Error("error while initializing viper", "error", err)
+	if cfgFilePath == "" {
+		viper.AddConfigPath(".")
+		viper.SetConfigFile("./config.yaml")
+	} else {
+		viper.SetConfigFile(cfgFilePath)
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		slog.Error("error while reading in the configs: %w", err)
 		return nil, err
 	}
+
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	var c Config
 	if err := viper.Unmarshal(&c); err != nil {
