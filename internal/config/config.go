@@ -66,13 +66,12 @@ func (c *Config) DebugEnabled() bool {
 func New(cfgFilePath string) (*Config, error) {
 	if cfgFilePath == "" {
 		viper.AddConfigPath(".")
-		viper.SetConfigFile("./config.yaml")
+		viper.SetConfigFile("config.yaml")
 	} else {
 		viper.SetConfigFile(cfgFilePath)
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		slog.Error("error while reading in the configs: %w", err)
 		return nil, err
 	}
 

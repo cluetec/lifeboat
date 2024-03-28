@@ -11,6 +11,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 data:
-  config.yaml:
+  config.yaml: |
     {{- toYaml .Values.configuration | nindent 4 }}
 {{- end }}
