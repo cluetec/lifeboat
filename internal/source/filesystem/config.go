@@ -18,6 +18,7 @@ package filesystem
 
 import (
 	globalConfig "github.com/cluetec/lifeboat/internal/config"
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"log/slog"
 )
@@ -29,8 +30,10 @@ type metaConfig struct {
 }
 
 type config struct {
-	Path string
+	Path string `validate:"required"`
 }
+
+var validate *validator.Validate
 
 func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
 	var c metaConfig
@@ -39,6 +42,11 @@ func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
 
 	if err != nil {
 		slog.Error("unable to decode config into filesystem source config", "error", err)
+		return nil, err
+	}
+
+	validate = validator.New()
+	if err := validate.Struct(c); err != nil {
 		return nil, err
 	}
 
