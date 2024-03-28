@@ -73,14 +73,17 @@ vault operator unseal $(echo "${unsealKeys}" | sed -n 3p | sed 's/Unseal Key 3: 
 # Login to vault
 echo "$rootToken" | vault login -
 
+kubectl exec -ti vault-1 -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -ti vault-2 -- vault operator raft join http://vault-0.vault-internal:8200
+
 # Unseal other nodes
 kubectl exec -ti vault-1 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 1p | sed 's/Unseal Key 1: //')
-kubectl exec -ti vault-1 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 1p | sed 's/Unseal Key 2: //')
-kubectl exec -ti vault-1 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 1p | sed 's/Unseal Key 3: //')
+kubectl exec -ti vault-1 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 2p | sed 's/Unseal Key 2: //')
+kubectl exec -ti vault-1 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 3p | sed 's/Unseal Key 3: //')
 
 kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 1p | sed 's/Unseal Key 1: //')
-kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 1p | sed 's/Unseal Key 2: //')
-kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 1p | sed 's/Unseal Key 3: //')
+kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 2p | sed 's/Unseal Key 2: //')
+kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 3p | sed 's/Unseal Key 3: //')
 
 # Enable & configure k8s auth
 vault auth enable kubernetes || true
@@ -102,4 +105,4 @@ for i in `seq 2 $amountOfSecrets`; do
     echo "${superSecureSecret}" | vault kv put secret/${i} content=-
 done
 
-printf "\nSuccessful initialized vault and put ${amountOfSecrets} with a length of ${secretLength} random chars into vault\n"
+printf "\nSuccessful initialized vault and put ${amountOfSecrets} secrets with a length of ${secretLength} random chars into vault\n"
