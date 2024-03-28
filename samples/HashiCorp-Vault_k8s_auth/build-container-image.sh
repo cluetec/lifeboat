@@ -21,12 +21,14 @@ set -o errtrace
 set -o pipefail
 set -o nounset
 
-containerRegistry="registry.localhost:5000"
+containerRegistry="localhost:5001"
 containerImage="lifeboat:local"
-# platform="linux/arm64"
+#platform="linux/arm64"
 platform="linux/amd64"
 
-podman buildx build \
+docker buildx build \
     --platform "${platform}" \
     -t "${containerRegistry}/${containerImage}" \
     ../../
+
+docker push "${containerRegistry}/${containerImage}"

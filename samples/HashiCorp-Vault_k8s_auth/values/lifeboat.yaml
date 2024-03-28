@@ -8,6 +8,7 @@ configuration:
     path: /backups/vault-backup.snap
 
 image:
+  repository: lifeboat-hashicorp-vault2:5001/lifeboat
   tag: local
   pullPolicy: Always
 
