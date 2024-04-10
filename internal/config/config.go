@@ -17,6 +17,7 @@
 package config
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"log/slog"
 	"strings"
@@ -25,20 +26,22 @@ import (
 type ResourceConfig map[string]any
 
 type SourceConfig struct {
-	Type           string
+	Type           string         `validate:"required"`
 	ResourceConfig ResourceConfig `mapstructure:",remain"`
 }
 
 type DestinationConfig struct {
-	Type           string
+	Type           string         `validate:"required"`
 	ResourceConfig ResourceConfig `mapstructure:",remain"`
 }
 
 type Config struct {
 	Source      SourceConfig
 	Destination DestinationConfig
-	LogLevel    string
+	LogLevel    string `validate:"omitempty,oneof=debug DEBUG info INFO warn WARN error ERROR"`
 }
+
+var validate *validator.Validate
 
 func (c *Config) GetLogLevel() slog.Level {
 	var level slog.Level
@@ -81,6 +84,11 @@ func New(cfgFilePath string) (*Config, error) {
 	var c Config
 	if err := viper.Unmarshal(&c); err != nil {
 		slog.Error("unable to decode into struct", "error", err)
+		return nil, err
+	}
+
+	validate = validator.New()
+	if err := validate.Struct(c); err != nil {
 		return nil, err
 	}
 

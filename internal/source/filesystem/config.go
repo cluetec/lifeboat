@@ -38,6 +38,7 @@ var validate *validator.Validate
 func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
 	var c metaConfig
 
+	slog.Debug("Trying to decode received resource config", "resourceConfig", rc)
 	err := mapstructure.Decode(rc, &c)
 
 	if err != nil {

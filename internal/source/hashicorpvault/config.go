@@ -33,8 +33,8 @@ type metaConfig struct {
 
 type config struct {
 	Address    string `validate:"http_url,required"`
-	Token      string
-	AuthMethod string `validate:"oneof=token kubernetes"`
+	Token      string `validate:"required_if=authMethod token"`
+	AuthMethod string `mapstructure:"authmethod" validate:"required,oneof=token kubernetes"`
 }
 
 var validate *validator.Validate
@@ -44,6 +44,7 @@ var validate *validator.Validate
 func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
 	var c metaConfig
 
+	slog.Debug("Trying to decode received resource config", "resourceConfig", rc)
 	err := mapstructure.Decode(rc, &c)
 	if err != nil {
 		slog.Error("unable to decode config into HashiCorp Vault source config", "error", err)
