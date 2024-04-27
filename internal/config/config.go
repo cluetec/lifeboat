@@ -17,22 +17,27 @@
 package config
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/spf13/viper"
 	"log/slog"
 	"strings"
+
+	"github.com/cluetec/lifeboat/internal/config/validator"
+	destFilesystem "github.com/cluetec/lifeboat/internal/destination/filesystem"
+	srcFilesystem "github.com/cluetec/lifeboat/internal/source/filesystem"
+	"github.com/cluetec/lifeboat/internal/source/hashicorpvault"
+	"github.com/spf13/viper"
 )
 
 type ResourceConfig map[string]any
 
 type SourceConfig struct {
-	Type           string         `validate:"required"`
-	ResourceConfig ResourceConfig `mapstructure:",remain"`
+	Type           string                `validate:"required,oneof=filesystem hashicorp"`
+	Filesystem     srcFilesystem.Config  `validate:"omitempty"`
+	HashiCorpVault hashicorpvault.Config `validate:"omitempty"`
 }
 
 type DestinationConfig struct {
-	Type           string         `validate:"required"`
-	ResourceConfig ResourceConfig `mapstructure:",remain"`
+	Type       string                `validate:"required,oneof=filesystem"`
+	Filesystem destFilesystem.Config `validate:"omitempty"`
 }
 
 type Config struct {
@@ -40,8 +45,6 @@ type Config struct {
 	Destination DestinationConfig
 	LogLevel    string `validate:"omitempty,oneof=debug DEBUG info INFO warn WARN error ERROR"`
 }
-
-var validate *validator.Validate
 
 func (c *Config) GetLogLevel() slog.Level {
 	var level slog.Level
@@ -87,8 +90,7 @@ func New(cfgFilePath string) (*Config, error) {
 		return nil, err
 	}
 
-	validate = validator.New()
-	if err := validate.Struct(c); err != nil {
+	if err := validator.Validator.Struct(c); err != nil {
 		return nil, err
 	}
 

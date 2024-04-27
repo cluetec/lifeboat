@@ -14,29 +14,8 @@
  * limitations under the License.
  */
 
-package hashicorpvault
+package validator
 
-import (
-	"reflect"
-	"testing"
+import playgroundValidator "github.com/go-playground/validator/v10"
 
-	vault "github.com/hashicorp/vault/api"
-)
-
-func Test_config_GetHashiCorpVaultConfig(t *testing.T) {
-	// given
-	c := &Config{
-		Address:    "http://localhost:8200",
-		Token:      "root",
-		AuthMethod: "token",
-	}
-	want := &vault.Config{Address: c.Address}
-
-	// when
-	got := c.GetHashiCorpVaultConfig()
-
-	// then
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetHashiCorpVaultConfig() = %v, want %v", got, want)
-	}
-}
+var Validator = playgroundValidator.New()

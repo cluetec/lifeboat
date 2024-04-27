@@ -21,6 +21,9 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	destFilesystem "github.com/cluetec/lifeboat/internal/destination/filesystem"
+	srcFilesystem "github.com/cluetec/lifeboat/internal/source/filesystem"
 )
 
 func TestNew(t *testing.T) {
@@ -35,25 +38,22 @@ source:
 destination:
   type: filesystem
   filesystem:
-    path: /destination/path.txt`))
+    path: /destination/path.txt
+`))
 		defer removeTempConfigFile(f)
 
 		want := &Config{
 			LogLevel: "",
 			Source: SourceConfig{
 				Type: "filesystem",
-				ResourceConfig: ResourceConfig{
-					"filesystem": map[string]interface{}{
-						"path": "/source/path.txt",
-					},
+				Filesystem: srcFilesystem.Config{
+					Path: "/source/path.txt",
 				},
 			},
 			Destination: DestinationConfig{
 				Type: "filesystem",
-				ResourceConfig: ResourceConfig{
-					"filesystem": map[string]interface{}{
-						"path": "/destination/path.txt",
-					},
+				Filesystem: destFilesystem.Config{
+					Path: "/destination/path.txt",
 				},
 			},
 		}
@@ -76,27 +76,23 @@ destination:
 
 	t.Run("Load config file", func(t *testing.T) {
 		// given
-
 		// write data to the temporary file
-		var yamlExample = []byte(`
+		f := provideTempConfigFile(t, []byte(`
 loglevel: warn
 source:
   type: filesystem
 destination:
   type: filesystem
-`)
-		f := provideTempConfigFile(t, yamlExample)
+`))
 		defer removeTempConfigFile(f)
 
 		want := &Config{
 			LogLevel: "warn",
 			Source: SourceConfig{
-				Type:           "filesystem",
-				ResourceConfig: nil,
+				Type: "filesystem",
 			},
 			Destination: DestinationConfig{
-				Type:           "filesystem",
-				ResourceConfig: nil,
+				Type: "filesystem",
 			},
 		}
 
@@ -113,58 +109,55 @@ destination:
 	})
 
 	// ⚠️ If this tests fails, try to run it again with the build tag `viper_bind_struct` enabled.
-	//	t.Run("Consideration of env variables", func(t *testing.T) {
-	//		// given
-	//		// create empty config file
-	//		f := provideTempConfigFile(t, []byte(`
-	//source:
-	//  type: filesystem
-	//destination:
-	//  type: filesystem`))
-	//		defer removeTempConfigFile(f)
-	//
-	//		// set environment variable
-	//		defer os.Clearenv()
-	//		_ = os.Setenv("LOGLEVEL", "warn")
-	//		_ = os.Setenv("SOURCE_FILESYSTEM_PATH", "/source/path/from/env.txt")
-	//		_ = os.Setenv("DESTINATION_FILESYSTEM_PATH", "/destination/path/from/env.txt")
-	//
-	//		want := &Config{
-	//			LogLevel: "warn",
-	//			Source: SourceConfig{
-	//				Type: "filesystem",
-	//				ResourceConfig: ResourceConfig{
-	//					"filesystem": map[string]interface{}{
-	//						"path": "/source/path/from/env.txt",
-	//					},
-	//				},
-	//			},
-	//			Destination: DestinationConfig{
-	//				Type: "filesystem",
-	//				ResourceConfig: ResourceConfig{
-	//					"filesystem": map[string]interface{}{
-	//						"path": "/destination/path/from/env.txt",
-	//					},
-	//				},
-	//			},
-	//		}
-	//
-	//		// when
-	//		got, err := New(f.Name())
-	//
-	//		// then
-	//		if err != nil {
-	//			t.Fatalf("New() returned an error: %v", err)
-	//		}
-	//		if !reflect.DeepEqual(got, want) {
-	//			t.Errorf("New() got = %v, want %v", got, want)
-	//		}
-	//	})
+	t.Run("Consideration of env variables", func(t *testing.T) {
+		// given
+		// create empty config file
+		f := provideTempConfigFile(t, []byte(`
+source:
+  type: filesystem
+destination:
+  type: filesystem
+`))
+		defer removeTempConfigFile(f)
+
+		// set environment variable
+		defer os.Clearenv()
+		_ = os.Setenv("LOGLEVEL", "warn")
+		_ = os.Setenv("SOURCE_FILESYSTEM_PATH", "/source/path/from/env.txt")
+		_ = os.Setenv("DESTINATION_FILESYSTEM_PATH", "/destination/path/from/env.txt")
+
+		want := &Config{
+			LogLevel: "warn",
+			Source: SourceConfig{
+				Type: "filesystem",
+				Filesystem: srcFilesystem.Config{
+					Path: "/source/path/from/env.txt",
+				},
+			},
+			Destination: DestinationConfig{
+				Type: "filesystem",
+				Filesystem: destFilesystem.Config{
+					Path: "/destination/path/from/env.txt",
+				},
+			},
+		}
+
+		// when
+		got, err := New(f.Name())
+
+		// then
+		if err != nil {
+			t.Fatalf("New() returned an error: %v", err)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("New() got = %v, want %v", got, want)
+		}
+	})
 
 	t.Run("Consideration of env variables over config file", func(t *testing.T) {
 		// given
 		// write data to the temporary file
-		var yamlExample = []byte(`
+		f := provideTempConfigFile(t, []byte(`
 loglevel: warn
 source:
   type: filesystem
@@ -174,8 +167,7 @@ destination:
   type: filesystem
   filesystem:
     path: /destination/path.txt
-`)
-		f := provideTempConfigFile(t, yamlExample)
+`))
 		defer removeTempConfigFile(f)
 
 		defer os.Clearenv()
@@ -187,18 +179,14 @@ destination:
 			LogLevel: "error",
 			Source: SourceConfig{
 				Type: "filesystem",
-				ResourceConfig: ResourceConfig{
-					"filesystem": map[string]interface{}{
-						"path": "/source/path/from/env.txt",
-					},
+				Filesystem: srcFilesystem.Config{
+					Path: "/source/path/from/env.txt",
 				},
 			},
 			Destination: DestinationConfig{
 				Type: "filesystem",
-				ResourceConfig: ResourceConfig{
-					"filesystem": map[string]interface{}{
-						"path": "/destination/path/from/env.txt",
-					},
+				Filesystem: destFilesystem.Config{
+					Path: "/destination/path/from/env.txt",
 				},
 			},
 		}

@@ -17,9 +17,10 @@
 package destination
 
 import (
-	"github.com/cluetec/lifeboat/internal/config"
 	"reflect"
 	"testing"
+
+	"github.com/cluetec/lifeboat/internal/config"
 )
 
 func TestNew(t *testing.T) {
@@ -41,7 +42,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := New(tt.args.c)
+			got, err := New(&tt.args.c)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
 				return
