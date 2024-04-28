@@ -23,12 +23,12 @@ releases:
       - values/vault.yaml
     missingFileHandler: Error
 
-  # - name: lifeboat
-  #   chart: ../../chart
-  #   version: 0.1.0
-  #   values:
-  #     - values/lifeboat.yaml
-  #   missingFileHandler: Error
+#  - name: lifeboat
+#    chart: ../../chart
+#    version: 0.1.0
+#    values:
+#      - values/lifeboat.yaml
+#    missingFileHandler: Error
 
   # # This is needed in regard to this helm bug https://github.com/helm/helm/issues/10733
   # - name: init-pod

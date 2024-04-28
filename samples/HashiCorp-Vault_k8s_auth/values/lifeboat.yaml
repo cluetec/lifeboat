@@ -1,11 +1,19 @@
 configuration:
   source:
     type: hashicorpvault
-    address: http://127.0.0.1:8200
+    hashicorpvault:
+      address: http://vault:8200
+      authMethod: kubernetes
+      kubernetesAuth:
+        roleName: default
 
   destination:
     type: filesystem
-    path: /backups/vault-backup.snap
+    filesystem:
+      path: /backups/vault-backup.snap
+
+env:
+  LOGLEVEL: debug
 
 image:
   repository: lifeboat-hashicorp-vault2:5001/lifeboat

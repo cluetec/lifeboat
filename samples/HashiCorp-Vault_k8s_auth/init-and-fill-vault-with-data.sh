@@ -1,4 +1,5 @@
-#
+#!/bin/bash
+
 # Copyright 2023 cluetec GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +15,6 @@
 # limitations under the License.
 #
 
-#!/bin/bash
-
 set -o errexit
 set -o errtrace
 set -o pipefail
@@ -25,24 +24,6 @@ export VAULT_ADDR="http://localhost:8200"
 
 # Initialize vault
 initOutput=$(vault operator init)
-#initOutput="Unseal Key 1: xxxx
-#Unseal Key 2: xxxx
-#Unseal Key 3: xxxx
-#Unseal Key 4: xxxx
-#Unseal Key 5: xxxx
-#
-#Initial Root Token: xxxxx
-#
-#Vault initialized with 5 key shares and a key threshold of 3. Please securely
-#distribute the key shares printed above. When the Vault is re-sealed,
-#restarted, or stopped, you must supply at least 3 of these keys to unseal it
-#before it can start servicing requests.
-#
-#Vault does not store the generated root key. Without at least 3 keys to
-#reconstruct the root key, Vault will remain permanently sealed!
-#
-#It is possible to generate new unseal keys, provided you have a quorum of
-#existing unseal keys shares. See \"vault operator rekey\" for more information.: No such file or directory"
 
 # Get unseal keys
 unsealKeys=$(echo "$initOutput" | grep "^Unseal Key ")
@@ -73,6 +54,7 @@ vault operator unseal $(echo "${unsealKeys}" | sed -n 3p | sed 's/Unseal Key 3: 
 # Login to vault
 echo "$rootToken" | vault login -
 
+# Let other nodes join the cluster
 kubectl exec -ti vault-1 -- vault operator raft join http://vault-0.vault-internal:8200
 kubectl exec -ti vault-2 -- vault operator raft join http://vault-0.vault-internal:8200
 
@@ -86,23 +68,29 @@ kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -
 kubectl exec -ti vault-2 -- vault operator unseal $(echo "${unsealKeys}" | sed -n 3p | sed 's/Unseal Key 3: //')
 
 # Enable & configure k8s auth
+cat <<EOF | vault policy write backup -
+path "/sys/storage/raft/snapshot" {
+  capabilities = ["read"]
+}
+EOF
+
 vault auth enable kubernetes || true
 vault write auth/kubernetes/config kubernetes_host=https://kubernetes.default:443
 vault write auth/kubernetes/role/default \
-    policies="root" \
+    policies="backup" \
     bound_service_account_names="*" \
     bound_service_account_namespaces="*"
 
 # Enable secret engine
-vault secrets enable -version=2 -path="secret" kv
+vault secrets enable -version=2 -path="secret" kv || true
 
 # Put secrets into vault
 amountOfSecrets=1000
 secretLength=2000
-for i in `seq 2 $amountOfSecrets`; do
-    printf "\nPut secret number ${i} into vault:\n"
+for i in $(seq 2 $amountOfSecrets); do
+    printf "\nPut secret number %s into vault:\n" "${i}"
     superSecureSecret=$(sed "s/[^a-zA-Z0-9]//g" <<< $(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%*()-+' | fold -w ${secretLength} | head -n 1))
     echo "${superSecureSecret}" | vault kv put secret/${i} content=-
 done
 
-printf "\nSuccessful initialized vault and put ${amountOfSecrets} secrets with a length of ${secretLength} random chars into vault\n"
+printf "\nSuccessful initialized vault and put %s secrets with a length of %s random chars into vault\n" "${amountOfSecrets}" "${secretLength}"
