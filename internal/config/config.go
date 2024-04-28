@@ -30,7 +30,7 @@ import (
 type ResourceConfig map[string]any
 
 type SourceConfig struct {
-	Type           string                `validate:"required,oneof=filesystem hashicorp"`
+	Type           string                `validate:"required,oneof=filesystem hashicorpvault"`
 	Filesystem     srcFilesystem.Config  `validate:"omitempty"`
 	HashiCorpVault hashicorpvault.Config `validate:"omitempty"`
 }

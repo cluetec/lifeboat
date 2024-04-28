@@ -52,7 +52,7 @@ func NewReader(c *Config) (*Reader, error) {
 	case "token":
 		client.SetToken(c.Token)
 	case "kubernetes":
-		k8sAuth, err := auth.NewKubernetesAuth("k8s-access")
+		k8sAuth, err := auth.NewKubernetesAuth(c.KubernetesAuth.RoleName)
 		if err != nil {
 			return nil, err
 		}

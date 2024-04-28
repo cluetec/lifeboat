@@ -24,10 +24,15 @@ import (
 
 const Type = "hashicorpvault"
 
+type KubernetesAuth struct {
+	RoleName string `validate:"required"`
+}
+
 type Config struct {
-	Address    string
-	Token      string
-	AuthMethod string
+	Address        string         `validate:"required,http_url"`
+	Token          string         `validate:"required_if=AuthMethod token"`
+	AuthMethod     string         `validate:"required,oneof=token kubernetes"`
+	KubernetesAuth KubernetesAuth `validate:"required_if=AuthMethod kubernetes,omitempty"`
 }
 
 // LogValue customizes how the `config` struct will be printed in the logs.
@@ -37,12 +42,8 @@ func (c *Config) LogValue() slog.Value {
 	groupValues = append(groupValues, slog.String("address", c.Address))
 	groupValues = append(groupValues, slog.String("authMethod", c.AuthMethod))
 
-	if c.AuthMethod == "token" {
-		if c.Token != "" {
-			groupValues = append(groupValues, slog.String("token", "***"))
-		} else {
-			groupValues = append(groupValues, slog.String("token", ""))
-		}
+	if c.AuthMethod == "kubernetes" {
+		groupValues = append(groupValues, slog.String("roleName", c.KubernetesAuth.RoleName))
 	}
 
 	return slog.GroupValue(groupValues...)

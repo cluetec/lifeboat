@@ -18,4 +18,14 @@ package validator
 
 import playgroundValidator "github.com/go-playground/validator/v10"
 
-var Validator = playgroundValidator.New()
+var Validator = playgroundValidator.New(playgroundValidator.WithRequiredStructEnabled())
+
+type ExpectedFieldError struct {
+	Namespace string
+	Tag       string
+}
+
+func ValidateFieldError(fieldError playgroundValidator.FieldError, expectedFieldError ExpectedFieldError) bool {
+	return fieldError.Namespace() == expectedFieldError.Namespace &&
+		fieldError.Tag() == expectedFieldError.Tag
+}

@@ -19,5 +19,5 @@ package filesystem
 const Type = "filesystem"
 
 type Config struct {
-	Path string `validate:"filepath,required"`
+	Path string `validate:"required,filepath"`
 }
