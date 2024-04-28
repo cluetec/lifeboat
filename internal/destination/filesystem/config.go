@@ -16,31 +16,8 @@
 
 package filesystem
 
-import (
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
-	"github.com/mitchellh/mapstructure"
-	"log/slog"
-)
-
 const Type = "filesystem"
 
-type metaConfig struct {
-	Filesystem config
-}
-
-type config struct {
-	Path string
-}
-
-func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
-	var c metaConfig
-
-	err := mapstructure.Decode(rc, &c)
-
-	if err != nil {
-		slog.Error("unable to decode config into filesystem destination config", "error", err)
-		return nil, err
-	}
-
-	return &c.Filesystem, nil
+type Config struct {
+	Path string `validate:"required,filepath"`
 }

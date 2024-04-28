@@ -18,23 +18,24 @@ package destination
 
 import (
 	"errors"
-	"github.com/cluetec/lifeboat/internal/config"
-	"github.com/cluetec/lifeboat/internal/destination/filesystem"
 	"io"
 	"log/slog"
+
+	"github.com/cluetec/lifeboat/internal/config"
+	"github.com/cluetec/lifeboat/internal/destination/filesystem"
 )
 
 type Destination struct {
 	Writer io.WriteCloser
 }
 
-func New(c config.DestinationConfig) (*Destination, error) {
+func New(c *config.DestinationConfig) (*Destination, error) {
 	d := Destination{}
 	var err error
 
 	switch {
 	case c.Type == filesystem.Type:
-		d.Writer, err = filesystem.NewWriter(&c.ResourceConfig)
+		d.Writer, err = filesystem.NewWriter(&c.Filesystem)
 	}
 	if err != nil {
 		slog.Error("error while initializing writer interface for destination system", "destinationType", c.Type, "error", err)

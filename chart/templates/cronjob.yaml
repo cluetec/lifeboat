@@ -92,7 +92,8 @@ spec:
               volumeMounts:
                 {{- if .Values.configuration }}
                 - name: config
-                  mountPath: /app
+                  mountPath: /config.yaml
+                  subPath: config.yaml
                   readOnly: true
                 {{- end }}
                 {{- if .Values.storage.enabled }}
@@ -123,8 +124,8 @@ spec:
               configMap:
                 name: {{ include "lifeboat.fullname" $ }}
                 items:
-                  - key: "config.yaml"
-                    path: "config.yaml"
+                  - key: config.yaml
+                    path: config.yaml
             {{- end }}
             {{- if .Values.storage.enabled }}
             {{- if .Values.storage.existingClaim }}

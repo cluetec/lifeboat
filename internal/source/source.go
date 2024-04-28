@@ -29,15 +29,15 @@ type Source struct {
 	Reader io.ReadCloser
 }
 
-func New(c config.SourceConfig) (*Source, error) {
+func New(c *config.SourceConfig) (*Source, error) {
 	s := Source{}
 	var err error
 
 	switch c.Type {
 	case filesystem.Type:
-		s.Reader, err = filesystem.NewReader(&c.ResourceConfig)
+		s.Reader, err = filesystem.NewReader(&c.Filesystem)
 	case hashicorpvault.Type:
-		s.Reader, err = hashicorpvault.NewReader(&c.ResourceConfig)
+		s.Reader, err = hashicorpvault.NewReader(&c.HashiCorpVault)
 	}
 	if err != nil {
 		slog.Error("error while initializing reader interface for source system", "sourceType", c.Type, "error", err)

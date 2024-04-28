@@ -1,0 +1,14 @@
+# Documentation: https://k3d.io/v5.6.0/usage/configfile/
+
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: lifeboat-hashicorp-vault2
+
+agents: 3
+
+registries:
+  create:
+    name: lifeboat-hashicorp-vault2
+    host: "0.0.0.0"
+    hostPort: "5001"

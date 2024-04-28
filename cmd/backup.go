@@ -17,13 +17,14 @@
 package cmd
 
 import (
+	"io"
+	"log/slog"
+
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/destination"
 	"github.com/cluetec/lifeboat/internal/logging"
 	"github.com/cluetec/lifeboat/internal/source"
 	"github.com/spf13/cobra"
-	"io"
-	"log/slog"
 )
 
 var cfgFilePath string
@@ -47,7 +48,7 @@ var backupCmd = &cobra.Command{
 
 		slog.Debug("start of backup command")
 
-		s, err := source.New(c.Source)
+		s, err := source.New(&c.Source)
 		if err != nil {
 			slog.Error("error while initializing source", "error", err)
 			return err
@@ -59,7 +60,7 @@ var backupCmd = &cobra.Command{
 			}
 		}()
 
-		d, err := destination.New(c.Destination)
+		d, err := destination.New(&c.Destination)
 		if err != nil {
 			slog.Error("error while initializing destination", "error", err)
 			return err

@@ -1,0 +1,25 @@
+configuration:
+  source:
+    type: hashicorpvault
+    hashicorpvault:
+      address: http://vault:8200
+      authMethod: kubernetes
+      kubernetesAuth:
+        roleName: default
+
+  destination:
+    type: filesystem
+    filesystem:
+      path: /backups/vault-backup.snap
+
+env:
+  LOGLEVEL: debug
+
+image:
+  repository: lifeboat-hashicorp-vault2:5001/lifeboat
+  tag: local
+  pullPolicy: Always
+
+storage:
+  enabled: true
+  size: 50Mi

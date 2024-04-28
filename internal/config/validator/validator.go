@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 cluetec GmbH
+ * Copyright 2024 cluetec GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-package config
+package validator
 
-import (
-	"github.com/spf13/viper"
-	"log/slog"
-	"strings"
-)
+import playgroundValidator "github.com/go-playground/validator/v10"
 
-func initViper(cfgFilePath string) error {
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+var Validator = playgroundValidator.New(playgroundValidator.WithRequiredStructEnabled())
 
-	if cfgFilePath == "" {
-		viper.AddConfigPath(".")
-		viper.SetConfigFile("./config.yaml")
-	} else {
-		viper.SetConfigFile(cfgFilePath)
-	}
+type ExpectedFieldError struct {
+	Namespace string
+	Tag       string
+}
 
-	if err := viper.ReadInConfig(); err != nil {
-		slog.Error("error while reading in the configs: %w", err)
-		return err
-	}
-
-	return nil
+func ValidateFieldError(fieldError playgroundValidator.FieldError, expectedFieldError ExpectedFieldError) bool {
+	return fieldError.Namespace() == expectedFieldError.Namespace &&
+		fieldError.Tag() == expectedFieldError.Tag
 }

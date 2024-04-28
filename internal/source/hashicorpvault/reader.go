@@ -17,10 +17,14 @@
 package hashicorpvault
 
 import (
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
-	vault "github.com/hashicorp/vault/api"
+	"context"
+	"fmt"
 	"io"
 	"log/slog"
+
+	"github.com/cluetec/lifeboat/internal/config/validator"
+	vault "github.com/hashicorp/vault/api"
+	auth "github.com/hashicorp/vault/api/auth/kubernetes"
 )
 
 const snapshotPath = "/sys/storage/raft/snapshot"
@@ -32,21 +36,36 @@ type Reader struct {
 }
 
 // NewReader initializes a new `Reader` struct which is implementing the `io.ReaderClose` interface.
-func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
-	c, err := newConfig(rc)
-	if err != nil {
-		slog.Error("error while initializing source config", "sourceType", Type, "error", err)
+func NewReader(c *Config) (*Reader, error) {
+	if err := validator.Validator.Struct(c); err != nil {
 		return nil, err
 	}
 
-	slog.Debug("source config loaded", "sourceType", Type, "config", c)
+	slog.Debug("source config validated", "sourceType", Type, "config", c)
 
 	client, err := vault.NewClient(c.GetHashiCorpVaultConfig())
 	if err != nil {
 		return nil, err
 	}
 
-	client.SetToken(c.Token)
+	switch c.AuthMethod {
+	case "token":
+		client.SetToken(c.Token)
+	case "kubernetes":
+		k8sAuth, err := auth.NewKubernetesAuth(c.KubernetesAuth.RoleName)
+		if err != nil {
+			return nil, err
+		}
+
+		authInfo, err := client.Auth().Login(context.TODO(), k8sAuth)
+		if err != nil {
+			return nil, err
+		}
+		if authInfo == nil {
+			return nil, fmt.Errorf("no auth info was returned after login")
+		}
+	}
+
 	return &Reader{client: client}, nil
 }
 

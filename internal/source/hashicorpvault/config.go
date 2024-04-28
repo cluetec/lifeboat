@@ -17,51 +17,39 @@
 package hashicorpvault
 
 import (
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
-	"github.com/go-playground/validator/v10"
-	vault "github.com/hashicorp/vault/api"
-	"github.com/mitchellh/mapstructure"
 	"log/slog"
+
+	vault "github.com/hashicorp/vault/api"
 )
 
 const Type = "hashicorpvault"
 
-type metaConfig struct {
-	hashicorpvault config
+type KubernetesAuth struct {
+	RoleName string `validate:"required"`
 }
 
-type config struct {
-	Address string `validate:"http_url,required"`
-	Token   string `validate:"required"`
-}
-
-var validate *validator.Validate
-
-// newConfig provides the specific `config` struct. It takes the generic `globalConfig.ResourceConfig` and
-// decodes it into the `config` struct and validates the values.
-func newConfig(rc *globalConfig.ResourceConfig) (*config, error) {
-	var c metaConfig
-
-	err := mapstructure.Decode(rc, &c)
-	if err != nil {
-		slog.Error("unable to decode config into HashiCorp Vault source config", "error", err)
-		return nil, err
-	}
-
-	validate = validator.New()
-	if err := validate.Struct(c); err != nil {
-		return nil, err
-	}
-
-	return &c.hashicorpvault, nil
+type Config struct {
+	Address        string         `validate:"required,http_url"`
+	Token          string         `validate:"required_if=AuthMethod token"`
+	AuthMethod     string         `validate:"required,oneof=token kubernetes"`
+	KubernetesAuth KubernetesAuth `validate:"required_if=AuthMethod kubernetes,omitempty"`
 }
 
 // LogValue customizes how the `config` struct will be printed in the logs.
-func (c *config) LogValue() slog.Value {
-	return slog.GroupValue(slog.String("address", c.Address), slog.String("token", "***"))
+func (c *Config) LogValue() slog.Value {
+	var groupValues []slog.Attr
+
+	groupValues = append(groupValues, slog.String("address", c.Address))
+	groupValues = append(groupValues, slog.String("authMethod", c.AuthMethod))
+
+	if c.AuthMethod == "kubernetes" {
+		groupValues = append(groupValues, slog.String("roleName", c.KubernetesAuth.RoleName))
+	}
+
+	return slog.GroupValue(groupValues...)
 }
 
-func (c *config) GetHashiCorpVaultConfig() *vault.Config {
+func (c *Config) GetHashiCorpVaultConfig() *vault.Config {
 	config := vault.Config{
 		Address: c.Address,
 	}
