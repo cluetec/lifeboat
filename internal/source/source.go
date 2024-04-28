@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 cluetec GmbH
+ * Copyright 2023-2024 cluetec GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,27 @@ package source
 
 import (
 	"errors"
+	"io"
+	"log/slog"
+
 	"github.com/cluetec/lifeboat/internal/config"
 	"github.com/cluetec/lifeboat/internal/source/filesystem"
 	"github.com/cluetec/lifeboat/internal/source/hashicorpvault"
-	"io"
-	"log/slog"
 )
 
 type Source struct {
 	Reader io.ReadCloser
 }
 
-func New(c config.SourceConfig) (*Source, error) {
+func New(c *config.SourceConfig) (*Source, error) {
 	s := Source{}
 	var err error
 
 	switch c.Type {
 	case filesystem.Type:
-		s.Reader, err = filesystem.NewReader(&c.ResourceConfig)
+		s.Reader, err = filesystem.NewReader(&c.Filesystem)
 	case hashicorpvault.Type:
-		s.Reader, err = hashicorpvault.NewReader(&c.ResourceConfig)
+		s.Reader, err = hashicorpvault.NewReader(&c.HashiCorpVault)
 	}
 	if err != nil {
 		slog.Error("error while initializing reader interface for source system", "sourceType", c.Type, "error", err)

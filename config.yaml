@@ -7,15 +7,19 @@ loglevel: info
 source:
   type: filesystem
 
+  # Filesystem config
   filesystem:
-    path: /tmp/source.txt
+    path: ./samples/filesystem/source.txt
 
+  # HashiCorp Vault config
   hashicorpvault:
     token:
-    address:
+    authMethod:
+    address: https://localhost:8200
 
 destination:
   type: filesystem
 
+  # Filesystem config
   filesystem:
-    path: /tmp/destination.txt
+    path: ./samples/filesystem/destination.txt
