@@ -21,24 +21,17 @@ import (
 	"os"
 	"reflect"
 	"testing"
-
-	destFilesystem "github.com/cluetec/lifeboat/internal/destination/filesystem"
-	srcFilesystem "github.com/cluetec/lifeboat/internal/source/filesystem"
 )
 
 func TestNew(t *testing.T) {
-	t.Run("Test default values", func(t *testing.T) {
+	t.Run("Load from config file and test default root level config", func(t *testing.T) {
 		// given
 		// create empty config file
 		f := provideTempConfigFile(t, []byte(`
 source:
   type: filesystem
-  filesystem:
-    path: /source/path.txt
 destination:
   type: filesystem
-  filesystem:
-    path: /destination/path.txt
 `))
 		defer removeTempConfigFile(f)
 
@@ -46,15 +39,9 @@ destination:
 			LogLevel: "",
 			Source: SourceConfig{
 				Type: "filesystem",
-				Filesystem: srcFilesystem.Config{
-					Path: "/source/path.txt",
-				},
 			},
 			Destination: DestinationConfig{
 				Type: "filesystem",
-				Filesystem: destFilesystem.Config{
-					Path: "/destination/path.txt",
-				},
 			},
 		}
 
@@ -74,40 +61,6 @@ destination:
 		}
 	})
 
-	t.Run("Load config file", func(t *testing.T) {
-		// given
-		// write data to the temporary file
-		f := provideTempConfigFile(t, []byte(`
-loglevel: warn
-source:
-  type: filesystem
-destination:
-  type: filesystem
-`))
-		defer removeTempConfigFile(f)
-
-		want := &Config{
-			LogLevel: "warn",
-			Source: SourceConfig{
-				Type: "filesystem",
-			},
-			Destination: DestinationConfig{
-				Type: "filesystem",
-			},
-		}
-
-		// when
-		got, err := New(f.Name())
-
-		// then
-		if err != nil {
-			t.Fatalf("New() returned an error: %v", err)
-		}
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("New() got = %v, want %v", got, want)
-		}
-	})
-
 	// ⚠️ If this tests fails, try to run it again with the build tag `viper_bind_struct` enabled.
 	t.Run("Consideration of env variables", func(t *testing.T) {
 		// given
@@ -121,24 +74,17 @@ destination:
 		defer removeTempConfigFile(f)
 
 		// set environment variable
-		defer os.Clearenv()
 		_ = os.Setenv("LOGLEVEL", "warn")
-		_ = os.Setenv("SOURCE_FILESYSTEM_PATH", "/source/path/from/env.txt")
-		_ = os.Setenv("DESTINATION_FILESYSTEM_PATH", "/destination/path/from/env.txt")
+		_ = os.Setenv("SOURCE_TYPE", "hashicorpvault")
+		defer os.Clearenv()
 
 		want := &Config{
 			LogLevel: "warn",
 			Source: SourceConfig{
-				Type: "filesystem",
-				Filesystem: srcFilesystem.Config{
-					Path: "/source/path/from/env.txt",
-				},
+				Type: "hashicorpvault",
 			},
 			Destination: DestinationConfig{
 				Type: "filesystem",
-				Filesystem: destFilesystem.Config{
-					Path: "/destination/path/from/env.txt",
-				},
 			},
 		}
 
@@ -161,33 +107,22 @@ destination:
 loglevel: warn
 source:
   type: filesystem
-  filesystem:
-    path: /source/path.txt
 destination:
   type: filesystem
-  filesystem:
-    path: /destination/path.txt
 `))
 		defer removeTempConfigFile(f)
 
 		defer os.Clearenv()
 		_ = os.Setenv("LOGLEVEL", "error")
-		_ = os.Setenv("SOURCE_FILESYSTEM_PATH", "/source/path/from/env.txt")
-		_ = os.Setenv("DESTINATION_FILESYSTEM_PATH", "/destination/path/from/env.txt")
+		_ = os.Setenv("SOURCE_TYPE", "hashicorpvault")
 
 		want := &Config{
 			LogLevel: "error",
 			Source: SourceConfig{
-				Type: "filesystem",
-				Filesystem: srcFilesystem.Config{
-					Path: "/source/path/from/env.txt",
-				},
+				Type: "hashicorpvault",
 			},
 			Destination: DestinationConfig{
 				Type: "filesystem",
-				Filesystem: destFilesystem.Config{
-					Path: "/destination/path/from/env.txt",
-				},
 			},
 		}
 

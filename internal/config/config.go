@@ -32,7 +32,7 @@ type ResourceConfig map[string]any
 type SourceConfig struct {
 	Type           string                `validate:"required,oneof=filesystem hashicorpvault"`
 	Filesystem     srcFilesystem.Config  `validate:"omitempty"`
-	HashiCorpVault hashicorpvault.Config `validate:"omitempty"`
+	HashiCorpVault hashicorpvault.Config `mapstructure:"hashicorpvault" validate:"omitempty"`
 }
 
 type DestinationConfig struct {
@@ -43,7 +43,7 @@ type DestinationConfig struct {
 type Config struct {
 	Source      SourceConfig      `validate:"required"`
 	Destination DestinationConfig `validate:"required"`
-	LogLevel    string            `validate:"omitempty,oneof=debug DEBUG info INFO warn WARN error ERROR"`
+	LogLevel    string            `mapstructure:"loglevel" validate:"omitempty,oneof=debug DEBUG info INFO warn WARN error ERROR"`
 }
 
 func (c *Config) GetLogLevel() slog.Level {
