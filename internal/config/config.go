@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 cluetec GmbH
+ * Copyright 2023-2024 cluetec GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,33 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"log/slog"
 	"strings"
+
+	"github.com/cluetec/lifeboat/internal/config/validator"
+	destFilesystem "github.com/cluetec/lifeboat/internal/destination/filesystem"
+	srcFilesystem "github.com/cluetec/lifeboat/internal/source/filesystem"
+	"github.com/cluetec/lifeboat/internal/source/hashicorpvault"
+	"github.com/spf13/viper"
 )
 
 type ResourceConfig map[string]any
 
 type SourceConfig struct {
-	Type           string
-	ResourceConfig ResourceConfig `mapstructure:",remain"`
+	Type           string                `validate:"required,oneof=filesystem hashicorpvault"`
+	Filesystem     srcFilesystem.Config  `validate:"omitempty"`
+	HashiCorpVault hashicorpvault.Config `mapstructure:"hashicorpvault" validate:"omitempty"`
 }
 
 type DestinationConfig struct {
-	Type           string
-	ResourceConfig ResourceConfig `mapstructure:",remain"`
+	Type       string                `validate:"required,oneof=filesystem"`
+	Filesystem destFilesystem.Config `validate:"omitempty"`
 }
 
 type Config struct {
-	Source      SourceConfig
-	Destination DestinationConfig
-	LogLevel    string
+	Source      SourceConfig      `validate:"required"`
+	Destination DestinationConfig `validate:"required"`
+	LogLevel    string            `mapstructure:"loglevel" validate:"omitempty,oneof=debug DEBUG info INFO warn WARN error ERROR"`
 }
 
 func (c *Config) GetLogLevel() slog.Level {
@@ -64,14 +70,27 @@ func (c *Config) DebugEnabled() bool {
 }
 
 func New(cfgFilePath string) (*Config, error) {
-	if err := initViper(cfgFilePath); err != nil {
-		slog.Error("error while initializing viper", "error", err)
+	if cfgFilePath == "" {
+		viper.AddConfigPath(".")
+		viper.SetConfigFile("config.yaml")
+	} else {
+		viper.SetConfigFile(cfgFilePath)
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}
+
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	var c Config
 	if err := viper.Unmarshal(&c); err != nil {
 		slog.Error("unable to decode into struct", "error", err)
+		return nil, err
+	}
+
+	if err := validator.Validator.Struct(c); err != nil {
 		return nil, err
 	}
 

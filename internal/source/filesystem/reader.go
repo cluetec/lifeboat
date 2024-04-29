@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 cluetec GmbH
+ * Copyright 2023-2024 cluetec GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,22 @@
 package filesystem
 
 import (
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
 	"log/slog"
 	"os"
+
+	"github.com/cluetec/lifeboat/internal/config/validator"
 )
 
 type Reader struct {
 	file *os.File
 }
 
-func NewReader(rc *globalConfig.ResourceConfig) (*Reader, error) {
-	c, err := newConfig(rc)
-	if err != nil {
-		slog.Error("error while initializing source config", "sourceType", Type, "error", err)
+func NewReader(c *Config) (*Reader, error) {
+	if err := validator.Validator.Struct(c); err != nil {
 		return nil, err
 	}
 
-	slog.Debug("source config loaded", "sourceType", Type, "config", c)
+	slog.Debug("source config validated", "sourceType", Type, "config", c)
 
 	f, err := os.Open(c.Path)
 	if err != nil {

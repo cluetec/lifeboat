@@ -19,6 +19,9 @@ MAIN_FILE_PATH ?= ./main.go
 # Path where the binary will be stored
 BINARY_FILE_PATH = out/lb
 
+# Comma separate list of build tags
+GO_BUILD_TAGS ?= viper_bind_struct
+
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
@@ -60,7 +63,7 @@ vet: ## Run go vet against code.
 
 .PHONY: test
 test: ## Run tests.
-	go test ./... -coverprofile cover.out
+	go test --tags=${GO_BUILD_TAGS} ./... -coverprofile cover.out
 
 ##@ Build
 
@@ -69,5 +72,5 @@ ci: dependencies vet test build ## Run certain recipes for CI pipeline.
 
 .PHONY: build
 build: ## Build binary.
-	go build --ldflags="-s -w" -o ${BINARY_FILE_PATH} ${MAIN_FILE_PATH}
+	go build --ldflags="-s -w" --tags=${GO_BUILD_TAGS} -o ${BINARY_FILE_PATH} ${MAIN_FILE_PATH}
 	chmod u+x ${BINARY_FILE_PATH}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 cluetec GmbH
+ * Copyright 2023-2024 cluetec GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,25 @@ package filesystem
 
 import (
 	"errors"
-	globalConfig "github.com/cluetec/lifeboat/internal/config"
 	"log/slog"
 	"os"
+
+	"github.com/cluetec/lifeboat/internal/config/validator"
 )
 
 type Writer struct {
 	file *os.File
 }
 
-func NewWriter(rc *globalConfig.ResourceConfig) (*Writer, error) {
-	c, err := newConfig(rc)
-	if err != nil {
-		slog.Error("error while initializing destination config", "destinationType", Type, "error", err)
+func NewWriter(c *Config) (*Writer, error) {
+	if err := validator.Validator.Struct(c); err != nil {
 		return nil, err
 	}
 
-	slog.Debug("destination config loaded", "destinationType", Type, "config", c)
+	slog.Debug("destination config validated", "destinationType", Type, "config", c)
 
 	// Check if destination file already exists
-	_, err = os.Stat(c.Path)
+	_, err := os.Stat(c.Path)
 	if err == nil {
 		return nil, errors.New("destination file already exists")
 	} else if !errors.Is(err, os.ErrNotExist) {
