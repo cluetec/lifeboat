@@ -38,14 +38,14 @@ jobs:
           disable-sudo: true
           disable-telemetry: true
           egress-policy: block
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: markdownlint-cli2-action
         uses: DavidAnson/markdownlint-cli2-action@v19
 
   link-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: gaurav-nelson/github-action-markdown-link-check@1b916f2cf6c36510a6059943104e3c42ce6c16bc # v1.0.16
         with:
           use-quiet-mode: 'yes'
